@@ -1,0 +1,31 @@
+
+  .yform .type-select.ipayment-valid-to select,
+  .yform .type-select.ipayment-valid-to span {
+    width:auto;
+    float: left;
+  }
+  .yform .type-select.ipayment-valid-to span {
+    padding: 0.3em 5px;
+    border: 1px solid transparent;
+  }
+  .yform .type-text.ipayment-cc-number input,
+  .yform .type-text.ipayment-cc-number img,
+  .yform .type-text.ipayment-cc-checkcode input,
+  .yform .type-text.ipayment-cc-checkcode img {
+    float: left;
+  }
+  .yform .type-text.ipayment-cc-number input {
+    width: 16em;
+  }
+  .yform .type-text.ipayment-cc-number img,
+  .yform .type-text.ipayment-cc-checkcode img {
+    margin: 0 5px;
+  }
+  .yform .type-text.ipayment-cc-checkcode input {
+    width: 4em;
+  }
+  .yform .type-select.ipayment-valid-to p,
+  .yform .type-text p {
+    font-size: 0.8em;
+    margin: 0 0 0 5px;
+  }
