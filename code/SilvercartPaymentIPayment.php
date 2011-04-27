@@ -287,10 +287,8 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $fields = parent::getCMSFieldsForModules($params);
 
         // Add fields to default tab ------------------------------------------
-        $nameField = new TextField('Name', _t('SilvercartPaymentMethod.NAME', 'Name'), $this->Name);
         $channelField = new ReadonlyField('DisplayPaymentChannel', _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL'), $this->getPaymentChannelName($this->PaymentChannel));
 
-        $fields->addFieldToTab('Sections.Basic', $nameField, 'isActive');
         $fields->addFieldToTab('Sections.Basic', $channelField, 'isActive');
 
         // Additional tabs and fields -----------------------------------------
