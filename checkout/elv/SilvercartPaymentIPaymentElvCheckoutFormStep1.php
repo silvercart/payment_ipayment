@@ -108,7 +108,9 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
      */
     public function  __construct($controller, $params = null, $preferences = null, $barebone = false) {
         parent::__construct($controller, $params, $preferences, $barebone);
-        $this->setFormAction($this->paymentMethodObj->iPaymentApiServerUrl);
+        if (!is_null($this->paymentMethodObj)) {
+            $this->setFormAction($this->paymentMethodObj->iPaymentApiServerUrl);
+        }
     }
 
     /**
@@ -120,7 +122,9 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
      * @since 04.04.2011
      */
     public function preferences() {
-        $this->paymentMethodObj->setCancelLink(Director::absoluteURL($this->controller->Link()));
+        if (!is_null($this->paymentMethodObj)) {
+            $this->paymentMethodObj->setCancelLink(Director::absoluteURL($this->controller->Link()));
+        }
         parent::preferences();
 
         $this->preferences['stepIsVisible']                     = true;

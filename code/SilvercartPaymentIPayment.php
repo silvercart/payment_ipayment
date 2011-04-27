@@ -65,6 +65,13 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'elv' => 'auth',
         'pp' => 'auth',
     );
+    
+    /**
+     * iPayment session lifetime in seconds
+     *
+     * @var int
+     */
+    protected $sessionLifeTime = 240;
 
     /**
      * db field definitions
@@ -252,8 +259,9 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                         if ($storedLogo) {
                             $paymentLogo->ImageID = $storedLogo->ID;
                         } else {
+                            file_put_contents(Director::baseFolder() . '/' . $upladsFolder->Filename . basename($logo), file_get_contents(Director::baseFolder() . $logo));
                             $image = new Image();
-                            $image->setFilename(Director::baseFolder() . $logo);
+                            $image->setFilename($upladsFolder->Filename . basename($logo));
                             $image->setName(basename($logo));
                             $image->Title = basename($logo, '.png');
                             $image->ParentID = $upladsFolder->ID;
@@ -502,10 +510,27 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string
      */
     public function getSessionId() {
-        if (!Session::get('ipayment_session_id')) {
+        if (!Session::get('ipayment_session_id') || $this->SessionExpired()) {
             $this->createSessionId();
         }
         return Session::get('ipayment_session_id');
+    }
+    
+    /**
+     * Checks, whether the iPAyment Session is expired or not.
+     *
+     * @return bool
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 27.04.2011
+     */
+    public function SessionExpired() {
+        if (!Session::get('ipayment_session_created')) {
+            return true;
+        } elseif (Session::get('ipayment_session_created') + $this->sessionLifeTime > time()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -611,6 +636,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @since 30.03.2011
      */
     protected function saveIPaymentSessionID($iPaymentSessionID) {
+        Session::set('ipayment_session_created', time());
         Session::set('ipayment_session_id', $iPaymentSessionID);
         Session::save();
     }
