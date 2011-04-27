@@ -527,7 +527,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     public function SessionExpired() {
         if (!Session::get('ipayment_session_created')) {
             return true;
-        } elseif (Session::get('ipayment_session_created') + $this->sessionLifeTime > time()) {
+        } elseif (Session::get('ipayment_session_created') + $this->sessionLifeTime < time()) {
             return true;
         }
         return false;
@@ -542,8 +542,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @since 11.04.2011
      */
     public function refreshSessionId() {
-        Session::clear('ipayment_session_id');
-        Session::save();
+        $this->clearSessionId();
         return $this->getSessionId();
     }
 

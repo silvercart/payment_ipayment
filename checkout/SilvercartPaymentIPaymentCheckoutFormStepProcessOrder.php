@@ -60,15 +60,15 @@ class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCh
         if (in_array($status, $this->paymentMethodObj->successIPaymentStatus)) {
             // transaction successful
             $order->setOrderStatusByID($this->paymentMethodObj->PaidOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentNotification', 'transaction #' . $shopper_id . ' successful.');
+            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' successful.');
         } elseif (in_array($status, $this->paymentMethodObj->failedIPaymentStatus)) {
             // transaction failed
             $order->setOrderStatusByID($this->paymentMethodObj->CanceledOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentNotification', 'transaction #' . $shopper_id . ' failed.');
+            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed.');
         } else {
             // unknown state
             $order->setOrderStatusByID($this->paymentMethodObj->ErrorOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentNotification', 'transaction #' . $shopper_id . ' failed - unknown state.');
+            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed - unknown state.');
         }
         $order->sendConfirmationMail();
     }

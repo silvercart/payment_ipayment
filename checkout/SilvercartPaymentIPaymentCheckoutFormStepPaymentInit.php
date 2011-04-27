@@ -70,6 +70,15 @@ class SilvercartPaymentIPaymentCheckoutFormStepPaymentInit extends SilvercartChe
                     }
                 } elseif (in_array($_GET['ret_status'], $this->paymentMethodObj->successIPaymentStatus)) {
                     // transaction successful
+                    $ipaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", SilvercartNumberRange::reserveNewNumberByIdentifier('OrderNumber')));
+                    if (!$ipaymentOrder) {
+                        $ipaymentOrder = new SilvercartPaymentIPaymentOrder();
+                    }
+                    $ipaymentOrder->ret_status = $_GET['ret_status'];
+                    $ipaymentOrder->MemberID = Member::currentUserID();
+                    $ipaymentOrder->shopper_id = SilvercartNumberRange::reserveNewNumberByIdentifier('OrderNumber');
+                    $ipaymentOrder->write();
+                    
                     $this->controller->addCompletedStep();
                     $this->controller->NextStep();
                 }
