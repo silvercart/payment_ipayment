@@ -240,7 +240,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         }
         
         $upladsFolder = DataObject::get_one('Folder', "`Name`='Uploads'");
-        if ($upladsFolder) {
+        if (!$upladsFolder) {
             $upladsFolder = new Folder();
             $upladsFolder->Name = 'Uploads';
             $upladsFolder->Title = 'Uploads';
