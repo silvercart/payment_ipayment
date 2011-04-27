@@ -11,7 +11,13 @@
     <label for="{$FormName}_{$FieldName}">{$Label}</label>
     <p><% _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.CC_NUMBER_HINT') %></p>
     $FieldTag
-    <img src="{$baseHref}/silvercart_payment_ipayment/images/visa.png" alt="Visa" title="Visa" />
-    <img src="{$baseHref}/silvercart_payment_ipayment/images/mastercard.png" alt="MasterCard" title="MasterCard" />
-    <img src="{$baseHref}/silvercart_payment_ipayment/images/american-express.png" alt="American Express" title="American Express" />
+    <% control Parent.getPaymentMethod %>
+        <% if showPaymentLogos %>
+            <% if PaymentLogos %>
+                <% control PaymentLogos %>
+                    $Image
+                <% end_control %>
+            <% end_if %>
+        <% end_if %>
+    <% end_control %>
 </div>
