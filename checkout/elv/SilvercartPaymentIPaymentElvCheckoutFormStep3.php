@@ -31,6 +31,6 @@
  * @since 04.04.2011
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
-class SilvercartPaymentIPaymentElvCheckoutFormStep3 extends SilvercartCheckoutFormStepDefaultOrderConfirmation {
+class SilvercartPaymentIPaymentElvCheckoutFormStep3 extends SilvercartPaymentIPaymentCheckoutFormStepDefaultOrderConfirmation {
 }
 

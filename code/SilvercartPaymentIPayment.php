@@ -510,7 +510,9 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string
      */
     public function getSessionId() {
-        if (!Session::get('ipayment_session_id') || $this->SessionExpired()) {
+        if (!Session::get('ipayment_session_id')
+         || $this->SessionExpired()
+         || Session::get('ipayment_session_amount') != (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100)) {
             $this->createSessionId();
         }
         return Session::get('ipayment_session_id');
@@ -605,7 +607,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                     'silentErrorUrl'    => $this->getCancelLink(),
                 )
             );
-            $this->saveIPaymentSessionID($iPaymentSessionID);
+            $this->saveIPaymentSessionID($iPaymentSessionID, $amount);
             $this->Log('createSessionId', 'create session ' . $iPaymentSessionID . ' for transaction ' . $transactionId);
             $this->createIPaymentOrder(
                     $transactionId,
@@ -628,15 +630,17 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * Saves the iPayment session ID to the session.
      *
      * @param string $iPaymentSessionID iPayment session ID
+     * @param string $amount            Current order amount
      *
      * @return void
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 30.03.2011
      */
-    protected function saveIPaymentSessionID($iPaymentSessionID) {
+    protected function saveIPaymentSessionID($iPaymentSessionID, $amount) {
         Session::set('ipayment_session_created', time());
         Session::set('ipayment_session_id', $iPaymentSessionID);
+        Session::set('ipayment_session_amount', $amount);
         Session::save();
     }
 
@@ -661,12 +665,13 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @since 11.04.2011
      */
     public function createIPaymentOrder($transactionId, $data = array()) {
-        if (!DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $transactionId))) {
+        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $transactionId));
+        if (!$iPaymentOrder) {
             $iPaymentOrder = new SilvercartPaymentIPaymentOrder();
             $iPaymentOrder->MemberID = Member::currentUserID();
-            $iPaymentOrder->update($data);
-            $iPaymentOrder->write();
         }
+        $iPaymentOrder->update($data);
+        $iPaymentOrder->write();
     }
 
     /**
