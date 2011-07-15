@@ -32,6 +32,12 @@
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
 class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCheckoutFormStepProcessOrder {
+    
+    /**
+     *
+     * @var SilvercartPaymentMethod
+     */
+    protected $paymentMethod = null;
 
     /**
      * processor method
@@ -45,31 +51,57 @@ class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCh
         $this->sendConfirmationMail = false;
         parent::process();
         $checkoutData = $this->controller->getCombinedStepData();
-        $this->paymentMethodObj = DataObject::get_by_id(
-            'SilvercartPaymentMethod',
-            $checkoutData['PaymentMethod']
+        $this->setPaymentMethod(
+            DataObject::get_by_id(
+                'SilvercartPaymentMethod',
+                $checkoutData['PaymentMethod']
+            )
         );
-        if ($this->paymentMethodObj) {
-            $this->paymentMethodObj->clearSessionId();
+        if ($this->getPaymentMethod()) {
+            $this->getPaymentMethod()->clearSessionId();
         }
         $checkoutData = $this->controller->getCombinedStepData();
         $order = DataObject::get_one('SilvercartOrder', sprintf("`ID`='%s'", $checkoutData['orderId']));
         $shopper_id = $order->OrderNumber;
         $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $shopper_id));
         $status = $iPaymentOrder->ret_status;
-        if (in_array($status, $this->paymentMethodObj->successIPaymentStatus)) {
+        if (in_array($status, $this->getPaymentMethod()->successIPaymentStatus)) {
             // transaction successful
-            $order->setOrderStatusByID($this->paymentMethodObj->PaidOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' successful.');
-        } elseif (in_array($status, $this->paymentMethodObj->failedIPaymentStatus)) {
+            if (in_array($iPaymentOrder->trx_typ, $this->getPaymentMethod()->payedIPaymentType)) {
+                $order->setOrderStatusByID($this->getPaymentMethod()->PaidOrderStatus);
+            } else {
+                $order->setOrderStatusByID($this->getPaymentMethod()->PreauthOrderStatus);
+            }
+            $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' successful.');
+        } elseif (in_array($status, $this->getPaymentMethod()->failedIPaymentStatus)) {
             // transaction failed
-            $order->setOrderStatusByID($this->paymentMethodObj->CanceledOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed.');
+            $order->setOrderStatusByID($this->getPaymentMethod()->CanceledOrderStatus);
+            $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed.');
         } else {
             // unknown state
-            $order->setOrderStatusByID($this->paymentMethodObj->ErrorOrderStatus);
-            $this->paymentMethodObj->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed - unknown state.');
+            $order->setOrderStatusByID($this->getPaymentMethod()->ErrorOrderStatus);
+            $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' failed - unknown state.');
         }
         $order->sendConfirmationMail();
+    }
+    
+    /**
+     * Returns the related payment method
+     *
+     * @return SilvercartPaymentMethod 
+     */
+    public function getPaymentMethod() {
+        return $this->paymentMethod;
+    }
+
+    /**
+     * Sets the related payment method
+     *
+     * @param SilvercartPaymentMethod $paymentMethod Related payment method
+     * 
+     * @return void
+     */
+    public function setPaymentMethod(SilvercartPaymentMethod $paymentMethod) {
+        $this->paymentMethod = $paymentMethod;
     }
 }

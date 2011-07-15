@@ -57,6 +57,8 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         'trx_paymentdata_country'   => 'Varchar(255)',
         'trx_remoteip_country'      => 'Varchar(255)',
         'ret_status'                => 'Varchar(255)',
+        // SilverCart based information
+        'triggeredTrxTyp'           => 'Varchar(255)',
     );
 
     public static $has_one = array(
@@ -68,7 +70,365 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
      *
      * @var array
      */
-    static $extensions = array(
+    public static $extensions = array(
         "Versioned('Live')",
     );
+    
+    public static $allowedCaptureTypes = array(
+        'preauth',
+        're_preauth',
+    );
+    
+    public static $allowedReverseTypes = array(
+        'preauth',
+        're_preauth',
+    );
+    
+    /**
+     * Related PaymentMethod
+     *
+     * @var SilvercartPaymentIPayment 
+     */
+    protected $paymentMethod = null;
+    /**
+     * SoapClient
+     *
+     * @var SoapClient 
+     */
+    protected $soapClient = null;
+    /**
+     * AccountData for SoapClient
+     *
+     * @var array
+     */
+    protected $soapAccountData = null;
+    /**
+     * TransactionData for SoapClient
+     *
+     * @var array
+     */
+    protected $soapTransactionData = null;
+    /**
+     * Options for SoapClient
+     *
+     * @var array
+     */
+    protected $soapOptions = null;
+    /**
+     * ProcessorUrls for SoapClient
+     *
+     * @var array
+     */
+    protected $soapProcessorUrls = null;
+
+    // ------------------------------------------------------------------------
+    // SOAP helper methods
+    // ------------------------------------------------------------------------
+
+    /**
+     * Sets the related PaymentMethod
+     *
+     * @param SilvercartPaymentIPayment $paymentMethod PaymentMethod
+     * 
+     * @return void
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    protected function setPaymentMethod(SilvercartPaymentIPayment $paymentMethod) {
+        $this->paymentMethod = $paymentMethod;
+    }
+
+    /**
+     * Returns the related PaymentMethod. Sets the related PaymentMethod if not 
+     * exists.
+     * 
+     * @return SilvercartPaymentIPayment
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function getPaymentMethod() {
+        if (is_null($this->paymentMethod)) {
+            $paymentMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("`PaymentChannel` = '%s'", $this->trx_paymenttyp));
+            $this->setPaymentMethod($paymentMethod);
+        }
+        return $this->paymentMethod;
+    }
+
+    /**
+     * Creates and returns a SoapClient to handle existing transactions with
+     * iPayment.
+     *
+     * @return SoapClient
+     */
+    protected function getSoapClient() {
+        if (is_null($this->soapClient)) {
+            $paymentMethod = $this->getPaymentMethod();
+            if ($paymentMethod) {
+                $apiUrl         = $paymentMethod->iPaymentSoapServerUrl;
+
+                // iPayment SOAP-call
+                $this->soapClient = new SoapClient($apiUrl, array('trace' => 1));
+            }
+        }
+        return $this->soapClient;
+    }
+    
+    /**
+     * Returns the AccountData for the SoapClient. Creates them if not exists.
+     *
+     * @return array
+     */
+    protected function getSoapAccountData() {
+        if (is_null($this->soapAccountData)) {
+            $paymentMethod = $this->getPaymentMethod();
+            if ($paymentMethod) {
+                $this->soapAccountData = array(
+                    'accountId'     => $paymentMethod->iPaymentAccountID,
+                    'trxuserId'     => $paymentMethod->iPaymentUserID,
+                    'trxpassword'   => $paymentMethod->iPaymentPassword,
+                );
+            }
+        }
+        return $this->soapAccountData;
+    }
+    
+    /**
+     * Returns the TransactionData for the SoapClient. Creates them if not exists.
+     *
+     * @return array
+     */
+    public function getSoapTransactionData() {
+        if (is_null($this->soapTransactionData)) {
+            $paymentMethod = $this->getPaymentMethod();
+            if ($paymentMethod) {
+                $this->soapTransactionData = array(
+                    'trxAmount'     => $this->trx_amount,
+                    'trxCurrency'   => $this->trx_currency,
+                    'shopperId'     => $this->shopper_id,
+                );
+            }
+        }
+        return $this->soapTransactionData;
+    }
+    
+    /**
+     * Returns the Options for the SoapClient. Creates them if not exists.
+     *
+     * @return array
+     */
+    public function getSoapOptions() {
+        if (is_null($this->soapOptions)) {
+            $this->soapOptions = array(
+                'fromIp'            => $_SERVER['REMOTE_ADDR'],
+                'client_name'       => 'SilverCart',
+                'client_version'    => SilvercartConfig::getConfig()->SilvercartVersion,
+            );
+        }
+        return $this->soapOptions;
+    }
+    
+    /**
+     * Returns the ProcessorUrls for the SoapClient. Creates them if not exists.
+     *
+     * @return array
+     */
+    public function getSoapProcessorUrls() {
+        if (is_null($this->soapProcessorUrls)) {
+            $paymentMethod = $this->getPaymentMethod();
+            if ($paymentMethod) {
+                $this->soapProcessorUrls = array(
+                    'redirectUrl'       => $paymentMethod->getReturnLink(),
+                    'hiddenTriggerUrl'  => $paymentMethod->getHiddenTriggerLink(),
+                    'silentErrorUrl'    => $paymentMethod->getCancelLink(),
+                );
+            }
+        }
+        return $this->soapProcessorUrls;
+    }
+
+    // ------------------------------------------------------------------------
+    // SOAP processing methods
+    // ------------------------------------------------------------------------
+    
+    /**
+     * Captures a preauthed iPayment transaction via SOAP call.
+     *
+     * @return bool
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function capture() {
+        $iPaymentCaptureResult = false;
+        if (in_array($this->trx_typ, self::$allowedCaptureTypes)) {
+            try {
+                $soapClient = $this->getSoapClient();
+                $iPaymentCaptureResult = $soapClient->capture(
+                    $this->getSoapAccountData(),
+                    $this->shopper_id,
+                    $this->getSoapTransactionData(),
+                    $this->getSoapOptions()
+                );
+                $this->triggeredTrxTyp = 'capture';
+                $this->write();
+                $this->Log('capture', 'captured preauthed transaction #' . $this->shopper_id);
+            } catch(SoapFault $e) {
+                $this->Log('capture', $e->getMessage());
+                $this->Log('capture', var_export($soapClient->__getLastRequest(), true));
+                $this->getPaymentMethod()->errorOccured = true;
+                $this->addError(_t('SilvercartPaymentIPayment.ERROR_CAPTURE'));
+            }
+        }
+        return $iPaymentCaptureResult;
+    }
+
+    /**
+     * Creates the iPayment Session ID
+     *
+     * @return string|boolean false
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 30.03.2011
+     */
+    public function createSession() {
+        $iPaymentSessionID = false;
+        try {
+            $soapClient = $this->getSoapClient();
+            $iPaymentSessionID = $soapClient->createSession(
+                $this->getSoapAccountData(),
+                $this->getSoapTransactionData(),
+                $this->getPaymentMethod()->getTransactionType(),
+                $this->getPaymentMethod()->PaymentChannel,
+                $this->getSoapOptions(),
+                $this->getSoapProcessorUrls()
+            );
+            $this->saveIPaymentSessionID($iPaymentSessionID, $this->trx_amount);
+            $this->Log('createSessionId', 'create session ' . $iPaymentSessionID . ' for transaction ' . $this->shopper_id);
+        } catch(SoapFault $e) {
+            $this->Log('createSessionId', $e->getMessage());
+            $this->Log('createSessionId', var_export($soapClient->__getLastRequest(), true));
+            $this->getPaymentMethod()->errorOccured = true;
+            $this->addError(_t('SilvercartPaymentIPayment.ERROR_SESSION'));
+        }
+        return $iPaymentSessionID;
+    }
+    
+    /**
+     * Re preauths an iPayment transaction via SOAP call.
+     *
+     * @return bool
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function rePreAuthorize() {
+        $iPaymentRePreauthResult = false;
+        if (in_array($this->trx_typ, self::$allowedReverseTypes)) {
+            try {
+                $soapClient = $this->getSoapClient();
+                $iPaymentRePreauthResult = $soapClient->rePreAuthorize(
+                    $this->getSoapAccountData(),
+                    $this->shopper_id,
+                    $this->getSoapTransactionData(),
+                    $this->getSoapOptions()
+                );
+                $this->triggeredTrxTyp = 're_preauth';
+                $this->write();
+                $this->Log('re_preauth', 're_preauthed transaction #' . $this->shopper_id);
+            } catch(SoapFault $e) {
+                $this->Log('re_preauth', $e->getMessage());
+                $this->Log('re_preauth', var_export($soapClient->__getLastRequest(), true));
+                $this->getPaymentMethod()->errorOccured = true;
+                $this->addError(_t('SilvercartPaymentIPayment.ERROR_PREAUTH'));
+            }
+        }
+        return $iPaymentRePreauthResult;
+    }
+    
+    /**
+     * Reverses a preauthed iPayment transaction via SOAP call.
+     *
+     * @return bool
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function reverse() {
+        $iPaymentReverseResult = false;
+        if (in_array($this->trx_typ, self::$allowedReverseTypes)) {
+            try {
+                $soapClient = $this->getSoapClient();
+                $iPaymentReverseResult = $soapClient->reverse(
+                    $this->getSoapAccountData(),
+                    $this->shopper_id,
+                    $this->getSoapTransactionData(),
+                    $this->getSoapOptions()
+                );
+                $this->triggeredTrxTyp = 'reverse';
+                $this->write();
+                $this->Log('reverse', 'reversed preauthed transaction #' . $this->shopper_id);
+            } catch(SoapFault $e) {
+                $this->Log('reverse', $e->getMessage());
+                $this->Log('reverse', var_export($soapClient->__getLastRequest(), true));
+                $this->getPaymentMethod()->errorOccured = true;
+                $this->addError(_t('SilvercartPaymentIPayment.ERROR_REVERSE'));
+            }
+        }
+        return $iPaymentReverseResult;
+    }
+
+    // ------------------------------------------------------------------------
+    // general helper methods
+    // ------------------------------------------------------------------------
+
+    /**
+     * Saves the iPayment session ID to the session.
+     *
+     * @param string $iPaymentSessionID iPayment session ID
+     * @param string $amount            Current order amount
+     *
+     * @return void
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 30.03.2011
+     */
+    protected function saveIPaymentSessionID($iPaymentSessionID, $amount) {
+        Session::set('ipayment_session_created.' .  $this->getPaymentMethod()->PaymentChannel, time());
+        Session::set('ipayment_session_id.' .       $this->getPaymentMethod()->PaymentChannel, $iPaymentSessionID);
+        Session::set('ipayment_session_amount.' .   $this->getPaymentMethod()->PaymentChannel, $amount);
+        Session::save();
+    }
+
+    /**
+     * Writes a log entry (wrapper for SilvercartPaymentMethod::Log())
+     *
+     * @param string $context the context for the log entry
+     * @param string $text    the text for the log entry
+     *
+     * @return void
+     *
+     * @see SilvercartPaymentMethod::Log()
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function Log($context, $text) {
+        $this->getPaymentMethod()->Log($context, $text);
+    }
+
+    /**
+     * registers an error (wrapper for SilvercartPaymentMethod::addError())
+     *
+     * @param string $errorText text for the error message
+     *
+     * @return void
+     *
+     * @see SilvercartPaymentMethod::addError()
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    protected function addError($errorText) {
+        $this->getPaymentMethod()->addError($errorText);
+    }
 }

@@ -59,12 +59,6 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
          */
         //'pp' => 'PaySafeCard',
     );
-
-    protected $trx_type_mapping = array(
-        'cc' => 'auth',
-        'elv' => 'auth',
-        'pp' => 'auth',
-    );
     
     /**
      * iPayment session lifetime in seconds
@@ -100,6 +94,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'iPaymentApiServerUrl_Live' => 'VarChar(255)',
         'iPaymentInfotextCheckout' => 'VarChar(255)',
         'PaidOrderStatus' => 'Int',
+        'PreauthOrderStatus' => 'Int',
         'CanceledOrderStatus' => 'Int',
         'ErrorOrderStatus' => 'Int',
         // Payment attributes
@@ -178,6 +173,19 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'SUCCESS',
         'REDIRECT',
     );
+    /**
+     * contains all trx types of the iPayment answer which declare the 
+     * transaction status as payed
+     *
+     * @var array
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public $payedIPaymentType = array(
+        'auth',
+        'capture',
+    );
     public static $errorCodes = array(
         // cc
         5000 => 'MISSING_CARDHOLDER',
@@ -205,6 +213,10 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         5021 => 'INVALID_CHECKCODE',
     );
 
+    // ------------------------------------------------------------------------
+    // ss default methods
+    // ------------------------------------------------------------------------
+
     /**
      * Creates and relates required order status
      * 
@@ -218,6 +230,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         $requiredStatus = array(
             'payed'             => _t('SilvercartOrderStatus.PAYED', 'payed'),
+            'ipayment_preauth'  => _t('SilvercartOrderStatus.IPAYMENT_PREAUTH', 'payment authorized'),
             'ipayment_canceled' => _t('SilvercartOrderStatus.IPAYMENT_CANCELED', 'iPayment canceled'),
             'ipayment_error'    => _t('SilvercartOrderStatus.IPAYMENT_ERROR', 'iPayment error'),
         );
@@ -279,6 +292,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         if ($iPaymentPayments) {
             foreach ($iPaymentPayments as $iPaymentPayment) {
                 $iPaymentPayment->PaidOrderStatus       = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
+                $iPaymentPayment->PreauthOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_preauth'")->ID;
                 $iPaymentPayment->CanceledOrderStatus   = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_canceled'")->ID;
                 $iPaymentPayment->ErrorOrderStatus      = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_error'")->ID;
                 $iPaymentPayment->write();
@@ -301,25 +315,26 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                 parent::fieldLabels($includerelations),
                 array(
                     // Base attributes
-                    'iPaymentAccountID_Dev'         => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
-                    'iPaymentAccountID_Live'        => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
-                    'iPaymentUserID_Dev'            => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
-                    'iPaymentUserID_Live'           => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
-                    'iPaymentPassword_Dev'          => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
-                    'iPaymentPassword_Live'         => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
-                    'iPaymentAdminPassword_Dev'     => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
-                    'iPaymentAdminPassword_Live'    => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
+                    'iPaymentAccountID_Dev'             => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
+                    'iPaymentAccountID_Live'            => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
+                    'iPaymentUserID_Dev'                => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
+                    'iPaymentUserID_Live'               => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
+                    'iPaymentPassword_Dev'              => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
+                    'iPaymentPassword_Live'             => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
+                    'iPaymentAdminPassword_Dev'         => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
+                    'iPaymentAdminPassword_Live'        => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
                     // API attributes
-                    'iPaymentServerIPs_Dev'         => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
-                    'iPaymentServerIPs_Live'        => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
-                    'iPaymentSoapServerUrl_Dev'     => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
-                    'iPaymentSoapServerUrl_Live'    => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
-                    'iPaymentApiServerUrl_Dev'      => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
-                    'iPaymentApiServerUrl_Live'     => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
-                    'iPaymentInfotextCheckout'      => _t('SilvercartPaymentIPayment.INFOTEXT_CHECKOUT', 'payment via iPayment'),
-                    'PaidOrderStatus'               => _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED', 'orderstatus for notification "payed"'),
-                    'CanceledOrderStatus'           => _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED', 'orderstatus for notification "canceled"'),
-                    'ErrorOrderStatus'              => _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR', 'orderstatus for notification "error"'),
+                    'iPaymentServerIPs_Dev'             => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
+                    'iPaymentServerIPs_Live'            => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
+                    'iPaymentSoapServerUrl_Dev'         => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
+                    'iPaymentSoapServerUrl_Live'        => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
+                    'iPaymentApiServerUrl_Dev'          => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
+                    'iPaymentApiServerUrl_Live'         => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
+                    'iPaymentInfotextCheckout'          => _t('SilvercartPaymentIPayment.INFOTEXT_CHECKOUT', 'payment via iPayment'),
+                    'PaidOrderStatus'                   => _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED', 'orderstatus for notification "payed"'),
+                    'PreauthOrderStatus'                => _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH', 'orderstatus for notification "preauth"'),
+                    'CanceledOrderStatus'               => _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED', 'orderstatus for notification "canceled"'),
+                    'ErrorOrderStatus'                  => _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR', 'orderstatus for notification "error"'),
                 )
         );
     }
@@ -339,8 +354,10 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         // Add fields to default tab ------------------------------------------
         $channelField = new ReadonlyField('DisplayPaymentChannel', _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL'), $this->getPaymentChannelName($this->PaymentChannel));
+        $showFormFieldsOnPaymentSelection = new CheckboxField('ShowFormFieldsOnPaymentSelection', _t('SilvercartPaymentMethod.SHOW_FORM_FIELDS_ON_PAYMENT_SELECTION'), $this->ShowFormFieldsOnPaymentSelection);
 
         $fields->addFieldToTab('Sections.Basic', $channelField, 'isActive');
+        $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection, 'isActive');
 
         // Additional tabs and fields -----------------------------------------
         $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
@@ -391,6 +408,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $tabOrderStatus->setChildren(
                 new FieldSet(
                         new DropdownField('PaidOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED'), $OrderStatus->map('ID', 'Title'), $this->PaidOrderStatus),
+                        new DropdownField('PreauthOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH'), $OrderStatus->map('ID', 'Title'), $this->PreauthOrderStatus),
                         new DropdownField('CanceledOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED'), $OrderStatus->map('ID', 'Title'), $this->CanceledOrderStatus),
                         new DropdownField('ErrorOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR'), $OrderStatus->map('ID', 'Title'), $this->ErrorOrderStatus)
                 )
@@ -398,6 +416,10 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         return $fields;
     }
+
+    // ------------------------------------------------------------------------
+    // casting methods
+    // ------------------------------------------------------------------------
 
     /**
      * Returns iPayments API URL dependent on the actual mode (Live/Dev)
@@ -488,34 +510,30 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     // ------------------------------------------------------------------------
 
     /**
-     * returns an error message depending on the error code.
-     *
-     * @param string $errorCode Errorcode
-     *
-     * @return string
-     */
-    public function getErrorMessage($errorCode) {
-        if (array_key_exists($errorCode, self::$errorCodes)) {
-            $identifier = self::$errorCodes[$errorCode];
-        } else {
-            $identifier = 'DEFAULT';
-        }
-        return _t('SilvercartPaymentIPayment.ERROR_' . $identifier);
-    }
-
-    /**
      * Returns the iPayment session ID. If the session ID doesn't exists, it will
      * be created.
      *
      * @return string
      */
     public function getSessionId() {
-        if (!Session::get('ipayment_session_id')
-         || $this->SessionExpired()
-         || Session::get('ipayment_session_amount') != (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100)) {
+        if (!Session::get('ipayment_session_id.' . $this->PaymentChannel)
+         || $this->SessionExpired()) {
             $this->createSessionId();
         }
-        return Session::get('ipayment_session_id');
+        $amount = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
+        if (Session::get('ipayment_session_amount.' . $this->PaymentChannel) != $amount) {
+            $iPaymentOrder = $this->getIPaymentOrder($this->getTransactionID());
+            if ($iPaymentOrder && in_array($iPaymentOrder->trx_typ, SilvercartPaymentIPaymentOrder::$allowedReverseTypes)) {
+                $iPaymentOrder->reverse();
+                $iPaymentOrder->trx_amount = $amount;
+                $iPaymentOrder->rePreAuthorize();
+                Session::set('ipayment_session_amount.' .   $this->PaymentChannel, $amount);
+                Session::save();
+            } else {
+                $this->createSessionId();
+            }
+        }
+        return Session::get('ipayment_session_id.' . $this->PaymentChannel);
     }
     
     /**
@@ -524,12 +542,12 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return bool
      * 
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 27.04.2011
+     * @since 15.07.2011
      */
     public function SessionExpired() {
-        if (!Session::get('ipayment_session_created')) {
+        if (!Session::get('ipayment_session_created.' . $this->PaymentChannel)) {
             return true;
-        } elseif (Session::get('ipayment_session_created') + $this->sessionLifeTime < time()) {
+        } elseif (Session::get('ipayment_session_created.' . $this->PaymentChannel) + $this->sessionLifeTime < time()) {
             return true;
         }
         return false;
@@ -554,10 +572,10 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return void
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 11.04.2011
+     * @since 15.07.2011
      */
     public function clearSessionId() {
-        Session::clear('ipayment_session_id');
+        Session::clear('ipayment_session_id.' . $this->PaymentChannel);
         Session::save();
     }
 
@@ -567,81 +585,108 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string|boolean false
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 30.03.2011
+     * @since 15.07.2011
      */
     protected function createSessionId() {
         $iPaymentSessionID = false;
-        $accountId      = $this->iPaymentAccountID;
-        $userId         = $this->iPaymentUserID;
-        $password       = $this->iPaymentPassword;
-        $apiUrl         = $this->iPaymentSoapServerUrl;
         $amount         = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
         $currency       = $this->getShoppingCart()->getAmountTotal()->getCurrency();
-        $transactionId  = SilvercartNumberRange::reserveNewNumberByIdentifier('OrderNumber');
-
-        // iPayment SOAP-call
-        $soapClient = new SoapClient($apiUrl, array('trace' => 1));
-
-        try {
-            $iPaymentSessionID = $soapClient->createSession(
+        $transactionId  = $this->getTransactionID();
+        
+        $iPaymentOrder = $this->createIPaymentOrder(
+                $transactionId,
                 array(
-                    'accountId'         => $accountId,
-                    'trxuserId'         => $userId,
-                    'trxpassword'       => $password,
-                ),
-                array(
-                    'trxAmount'         => $amount,
-                    'trxCurrency'       => $currency,
-                    'shopperId'         => $transactionId
-                ),
-                $this->trx_type_mapping[$this->PaymentChannel],
-                $this->PaymentChannel,
-                array(
-                    'fromIp'            => $_SERVER['REMOTE_ADDR'],
-                    'client_name'       => 'SilverCart',
-                    'client_version'    => SilvercartConfig::getConfig()->SilvercartVersion,
-                ),
-                array(
-                    'redirectUrl'       => $this->getReturnLink(),
-                    'hiddenTriggerUrl'  => $this->getHiddenTriggerLink(),
-                    'silentErrorUrl'    => $this->getCancelLink(),
+                    'trx_amount'        => $amount,
+                    'trx_currency'      => $currency,
+                    'shopper_id'        => $transactionId,
+                    'trx_paymenttyp'    => $this->PaymentChannel,
                 )
-            );
-            $this->saveIPaymentSessionID($iPaymentSessionID, $amount);
-            $this->Log('createSessionId', 'create session ' . $iPaymentSessionID . ' for transaction ' . $transactionId);
-            $this->createIPaymentOrder(
-                    $transactionId,
-                    array(
-                        'trx_amount'    => $amount,
-                        'trx_currency'  => $currency,
-                        'shopper_id'    => $transactionId
-                    )
-            );
-        } catch(SoapFault $e) {
-            $this->Log('createSessionId', $e->getMessage());
-            $this->Log('createSessionId', var_export($soapClient->__getLastRequest(), true));
-            $this->errorOccured = true;
-            $this->addError(_t('SilvercartPaymentIPayment.ERROR_SESSION'));
-        }
+        );
+        $iPaymentSessionID = $iPaymentOrder->createSession();
         return $iPaymentSessionID;
     }
 
+    // ------------------------------------------------------------------------
+    // general helper methods
+    // ------------------------------------------------------------------------
+    
     /**
-     * Saves the iPayment session ID to the session.
+     * Returns the iPayment transaction type dependent on the configured payment
+     * form field position.
      *
-     * @param string $iPaymentSessionID iPayment session ID
-     * @param string $amount            Current order amount
+     * @return string 
+     */
+    public function getTransactionType() {
+        $transactionType = 'auth';
+        if ($this->ShowFormFieldsOnPaymentSelection) {
+            $transactionType = 'preauth';
+        }
+        return $transactionType;
+    }
+    
+    /**
+     * Returns the transaction ID for iPayment
      *
-     * @return void
+     * @return string
+     */
+    public function getTransactionID() {
+        return SilvercartNumberRange::reserveNewNumberByIdentifier('OrderNumber');
+    }
+
+    /**
+     * Returns the related iPaymentOrder if exists.
+     *
+     * @param string $transactionId The payment reference for iPayment
+     * 
+     * @return SilvercartPaymentIPaymentOrder
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 30.03.2011
+     * @since 15.07.2011
      */
-    protected function saveIPaymentSessionID($iPaymentSessionID, $amount) {
-        Session::set('ipayment_session_created', time());
-        Session::set('ipayment_session_id', $iPaymentSessionID);
-        Session::set('ipayment_session_amount', $amount);
-        Session::save();
+    public function getIPaymentOrder($transactionId) {
+        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s' AND `trx_paymenttyp` = '%s'", $transactionId, $this->PaymentChannel));
+        return $iPaymentOrder;
+    }
+
+    /**
+     * Creates a new iPaymentOrder if not exists. Otherwise the existing one
+     * will be updated.
+     *
+     * @param string $transactionId The payment reference for iPayment
+     * @param string $data          Additional transaction information
+     * 
+     * @return SilvercartPaymentIPaymentOrder
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 15.07.2011
+     */
+    public function createIPaymentOrder($transactionId, $data = array()) {
+        $iPaymentOrder = $this->getIPaymentOrder($transactionId);
+        if (!$iPaymentOrder) {
+            $iPaymentOrder = new SilvercartPaymentIPaymentOrder();
+            $iPaymentOrder->MemberID = Member::currentUserID();
+        } else {
+            $data['shopper_id'] = $transactionId;
+        }
+        $iPaymentOrder->update($data);
+        $iPaymentOrder->write();
+        return $iPaymentOrder;
+    }
+
+    /**
+     * returns an error message depending on the error code.
+     *
+     * @param string $errorCode Errorcode
+     *
+     * @return string
+     */
+    public function getErrorMessage($errorCode) {
+        if (array_key_exists($errorCode, self::$errorCodes)) {
+            $identifier = self::$errorCodes[$errorCode];
+        } else {
+            $identifier = 'DEFAULT';
+        }
+        return _t('SilvercartPaymentIPayment.ERROR_' . $identifier);
     }
 
     /**
@@ -654,25 +699,26 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     }
 
     /**
-     * Creates a new iPaymentOrder if not exists.
+     * Returns the link to get back in the shop
      *
-     * @param string $transactionId The payment reference for iPayment
-     * @param string $data          Additional transaction information
-     * 
-     * @return void
-     *
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 11.04.2011
+     * @return string
      */
-    public function createIPaymentOrder($transactionId, $data = array()) {
-        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $transactionId));
-        if (!$iPaymentOrder) {
-            $iPaymentOrder = new SilvercartPaymentIPaymentOrder();
-            $iPaymentOrder->MemberID = Member::currentUserID();
-        }
-        $iPaymentOrder->update($data);
-        $iPaymentOrder->write();
+    public function getReturnLink() {
+        return Director::absoluteURL(Controller::curr()->Link());
     }
+
+    /**
+     * Returns the link for cancel action or end of session
+     *
+     * @return string
+     */
+    public function getCancelLink() {
+        return Director::absoluteURL(Controller::curr()->Link()) . 'GotoStep/3';
+    }
+
+    // ------------------------------------------------------------------------
+    // checkout step form methods
+    // ------------------------------------------------------------------------
 
     /**
      * Set the title for the submit button on the order confirmation step.
@@ -680,10 +726,31 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 11.04.2011
+     * @since 15.07.2011
      */
     public function getOrderConfirmationSubmitButtonTitle() {
-        return _t('SilvercartPaymentIPayment.ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE');
+        $orderConfirmationSubmitButtonTitle = _t('SilvercartPaymentIPayment.ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE');
+        if ($this->ShowFormFieldsOnPaymentSelection) {
+            $orderConfirmationSubmitButtonTitle = _t('SilvercartCheckoutFormStep.ORDER_NOW');
+        }
+        return $orderConfirmationSubmitButtonTitle;
+    }
+    
+    /**
+     * Returns an optional payment specific form name to insert into checkout step 3.
+     *
+     * @return string|boolean
+     */
+    public function getNestedFormName() {
+        $nestedFormName = false;
+        if ($this->ShowFormFieldsOnPaymentSelection) {
+            if ($this->PaymentChannel == 'cc') {
+                $nestedFormName = 'SilvercartPaymentIPaymentCcNestedForm';
+            } elseif ($this->PaymentChannel == 'elv') {
+                $nestedFormName = 'SilvercartPaymentIPaymentElvNestedForm';
+            }
+        }
+        return $nestedFormName;
     }
 
 }

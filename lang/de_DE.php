@@ -40,6 +40,7 @@ $lang['de_DE']['SilvercartHandlingCostIPayment']['SINGULARNAME'] = 'Gebühr';
 
 $lang['de_DE']['SilvercartOrderStatus']['IPAYMENT_CANCELED'] = 'iPayment abgebrochen';
 $lang['de_DE']['SilvercartOrderStatus']['IPAYMENT_ERROR'] = 'iPayment Fehler';
+$lang['de_DE']['SilvercartOrderStatus']['IPAYMENT_PREAUTH'] = 'Zahlung authorisiert';
 
 $lang['de_DE']['SilvercartPaymentIPayment']['ACCOUNT_ID'] = 'Account-ID';
 $lang['de_DE']['SilvercartPaymentIPayment']['API_URL'] = 'URL zum iPayment Silent CGI Checkout';
@@ -68,6 +69,7 @@ $lang['de_DE']['SilvercartPaymentIPayment']['ERROR_MISSING_BRANCH_CODE'] = 'Dies
 $lang['de_DE']['SilvercartPaymentIPayment']['ERROR_INVALID_BRANCH_CODE'] = 'Ungültiger Branch Code';
 $lang['de_DE']['SilvercartPaymentIPayment']['ERROR_MISSING_CHECKCODE'] = 'Dieses Feld darf nicht leer sein.';
 $lang['de_DE']['SilvercartPaymentIPayment']['ERROR_INVALID_CELLPHONE'] = 'Ungültige Mobiltelefonnummer';
+$lang['de_DE']['SilvercartPaymentIPayment']['ERROR_CAPTURE'] = 'Das Buchen der Zahlung ist fehlgeschlagen';
 $lang['de_DE']['SilvercartPaymentIPayment']['INFOTEXT_CHECKOUT'] = 'Zahlung über iPayment';
 $lang['de_DE']['SilvercartPaymentIPayment']['IPAYMENT_API'] = 'iPayment API';
 $lang['de_DE']['SilvercartPaymentIPayment']['NAME'] = 'iPayment';
