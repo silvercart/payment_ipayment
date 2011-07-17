@@ -99,12 +99,15 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'ErrorOrderStatus' => 'Int',
         // Payment attributes
         'PaymentChannel' => 'Enum("cc,elv,pp","cc")',
+        'CaptureTransactionOnOrderStatusChange' => 'Boolean',
+        'CaptureOrderStatus' => 'Int',
     );
 
     public static $casting = array(
         'iPaymentAccountID' => 'VarChar(255)',
         'iPaymentUserID' => 'VarChar(255)',
         'iPaymentPassword' => 'VarChar(255)',
+        'iPaymentAdminPassword' => 'VarChar(255)',
         'iPaymentApiServerUrl' => 'VarChar(255)',
         'iPaymentServerIPs' => 'VarChar(255)',
         'iPaymentSoapServerUrl' => 'VarChar(255)',
@@ -122,12 +125,14 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'iPaymentAccountID_Dev' => '99999',
         'iPaymentUserID_Dev' => '99999',
         'iPaymentPassword_Dev' => '0',
+        'iPaymentAdminPassword_Dev' => '5cfgRT34xsdedtFLdfHxj7tfwx24fe',
         'iPaymentServerIPs_Dev' => '212.227.34.218,212.227.34.219,212.227.34.220',
         'iPaymentServerIPs_Live' => '212.227.34.218,212.227.34.219,212.227.34.220',
         'iPaymentSoapServerUrl_Dev' => 'https://ipayment.de/v2/ip_service_v3.php?wsdl',
         'iPaymentSoapServerUrl_Live' => 'https://ipayment.de/v2/ip_service_v3.php?wsdl',
         'iPaymentApiServerUrl_Dev' => 'https://ipayment.de/merchant/99999/processor/2.0/',
         'iPaymentApiServerUrl_Live' => 'https://ipayment.de/merchant/__ACCOUNTID__/processor/2.0/',
+        'CaptureTransactionOnOrderStatusChange' => false,
     );
 
     /**
@@ -351,13 +356,18 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      */
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFieldsForModules($params);
+        $OrderStatus = DataObject::get('SilvercartOrderStatus');
 
         // Add fields to default tab ------------------------------------------
         $channelField = new ReadonlyField('DisplayPaymentChannel', _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL'), $this->getPaymentChannelName($this->PaymentChannel));
         $showFormFieldsOnPaymentSelection = new CheckboxField('ShowFormFieldsOnPaymentSelection', _t('SilvercartPaymentMethod.SHOW_FORM_FIELDS_ON_PAYMENT_SELECTION'), $this->ShowFormFieldsOnPaymentSelection);
-
+        $captureTransactionOnOrderStatusChangeField = new CheckboxField('CaptureTransactionOnOrderStatusChange', _t('SilvercartPaymentIPayment.CAPTURE_TRANSACTION_ON_ORDER_STATUS_CHANGE'), $this->CaptureTransactionOnOrderStatusChange);
+        $captureOrderStatusField = new DropdownField('CaptureOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_CAPTURE'), $OrderStatus->map('ID', 'Title'), $this->CaptureOrderStatus);
+        
         $fields->addFieldToTab('Sections.Basic', $channelField, 'isActive');
         $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection, 'isActive');
+        $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField, 'isActive');
+        $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField, 'isActive');
 
         // Additional tabs and fields -----------------------------------------
         $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
@@ -403,8 +413,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                 )
         );
 
-        // Bestellstatus Tab fields -------------------------------------------
-        $OrderStatus = DataObject::get('SilvercartOrderStatus');
+        // Orderstatus Tab fields -------------------------------------------
         $tabOrderStatus->setChildren(
                 new FieldSet(
                         new DropdownField('PaidOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED'), $OrderStatus->map('ID', 'Title'), $this->PaidOrderStatus),
@@ -445,6 +454,20 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
             $password = $this->iPaymentPassword_Live;
         } else {
             $password = $this->iPaymentPassword_Dev;
+        }
+        return $password;
+    }
+
+    /**
+     * Returns the iPayment admin action password dependent on the actual mode (Live/Dev)
+     *
+     * @return string
+     */
+    public function getiPaymentAdminPassword() {
+        if ($this->mode == 'Live') {
+            $password = $this->iPaymentAdminPassword_Live;
+        } else {
+            $password = $this->iPaymentAdminPassword_Dev;
         }
         return $password;
     }
@@ -772,6 +795,33 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
             }
         }
         return $nestedFormName;
+    }
+
+    // ------------------------------------------------------------------------
+    // after order methods
+    // ------------------------------------------------------------------------
+    
+    /**
+     * Captures an preauth iPayment transaction on changing the order status
+     * to the configured one.
+     *
+     * @param SilvercartOrder $order Order
+     * 
+     *
+     * @return void
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 17.07.2011
+     */
+    public function handleOrderStatusChange(SilvercartOrder $order) {
+        if ($this->CaptureTransactionOnOrderStatusChange &&
+            $order->SilvercartOrderStatusID == $this->CaptureOrderStatus) {
+            $ipaymentOrder = $this->getIPaymentOrder($order->OrderNumber);
+            if (in_array($ipaymentOrder->trx_typ, SilvercartPaymentIPaymentOrder::$allowedCaptureTypes)) {
+                $ipaymentOrder->capture();
+            }
+        }
+        
     }
 
 }

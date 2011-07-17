@@ -57,8 +57,6 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         'trx_paymentdata_country'   => 'Varchar(255)',
         'trx_remoteip_country'      => 'Varchar(255)',
         'ret_status'                => 'Varchar(255)',
-        // SilverCart based information
-        'triggeredTrxTyp'           => 'Varchar(255)',
     );
 
     public static $has_one = array(
@@ -84,6 +82,12 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         're_preauth',
     );
     
+    public static $allowedPreAuthorizeTypes = array(
+        'preauth',
+        're_preauth',
+        'reverse',
+    );
+
     /**
      * Related PaymentMethod
      *
@@ -180,7 +184,7 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
      *
      * @return array
      */
-    protected function getSoapAccountData() {
+    protected function getSoapAccountData($withAdminPassword = false) {
         if (is_null($this->soapAccountData)) {
             $paymentMethod = $this->getPaymentMethod();
             if ($paymentMethod) {
@@ -189,6 +193,9 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
                     'trxuserId'     => $paymentMethod->iPaymentUserID,
                     'trxpassword'   => $paymentMethod->iPaymentPassword,
                 );
+                if ($withAdminPassword) {
+                    $this->soapAccountData['adminactionpassword'] = $paymentMethod->iPaymentAdminPassword;
+                }
             }
         }
         return $this->soapAccountData;
@@ -265,15 +272,13 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         if (in_array($this->trx_typ, self::$allowedCaptureTypes)) {
             try {
                 $soapClient = $this->getSoapClient();
-                $iPaymentCaptureResult = $soapClient->capture(
-                    $this->getSoapAccountData(),
-                    $this->shopper_id,
+                $soapResult = $soapClient->capture(
+                    $this->getSoapAccountData(true),
+                    $this->ret_trx_number,
                     $this->getSoapTransactionData(),
                     $this->getSoapOptions()
                 );
-                $this->triggeredTrxTyp = 'capture';
-                $this->write();
-                $this->Log('capture', 'captured preauthed transaction #' . $this->shopper_id);
+                $iPaymentCaptureResult = $this->handleSoapResult('capture', $soapResult);
             } catch(SoapFault $e) {
                 $this->Log('capture', $e->getMessage());
                 $this->Log('capture', var_export($soapClient->__getLastRequest(), true));
@@ -328,18 +333,16 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
      */
     public function rePreAuthorize() {
         $iPaymentRePreauthResult = false;
-        if (in_array($this->trx_typ, self::$allowedReverseTypes)) {
+        if (in_array($this->trx_typ, self::$allowedPreAuthorizeTypes)) {
             try {
                 $soapClient = $this->getSoapClient();
-                $iPaymentRePreauthResult = $soapClient->rePreAuthorize(
-                    $this->getSoapAccountData(),
-                    $this->shopper_id,
+                $soapResult = $soapClient->rePreAuthorize(
+                    $this->getSoapAccountData(true),
+                    $this->ret_trx_number,
                     $this->getSoapTransactionData(),
                     $this->getSoapOptions()
                 );
-                $this->triggeredTrxTyp = 're_preauth';
-                $this->write();
-                $this->Log('re_preauth', 're_preauthed transaction #' . $this->shopper_id);
+                $iPaymentRePreauthResult = $this->handleSoapResult('re_preauth', $soapResult);
             } catch(SoapFault $e) {
                 $this->Log('re_preauth', $e->getMessage());
                 $this->Log('re_preauth', var_export($soapClient->__getLastRequest(), true));
@@ -366,15 +369,13 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         if (in_array($this->trx_typ, self::$allowedReverseTypes)) {
             try {
                 $soapClient = $this->getSoapClient();
-                $iPaymentReverseResult = $soapClient->reverse(
-                    $this->getSoapAccountData(),
-                    $this->shopper_id,
+                $soapResult = $soapClient->reverse(
+                    $this->getSoapAccountData(true),
+                    $this->ret_trx_number,
                     $this->getSoapTransactionData(),
                     $this->getSoapOptions()
                 );
-                $this->triggeredTrxTyp = 'reverse';
-                $this->write();
-                $this->Log('reverse', 'reversed preauthed transaction #' . $this->shopper_id);
+                $iPaymentReverseResult = $this->handleSoapResult('reverse', $soapResult);
             } catch(SoapFault $e) {
                 $this->Log('reverse', $e->getMessage());
                 $this->Log('reverse', var_export($soapClient->__getLastRequest(), true));
@@ -391,6 +392,61 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
     // ------------------------------------------------------------------------
     // general helper methods
     // ------------------------------------------------------------------------
+    
+    /**
+     * Handles the given SOAP result.
+     *
+     * @param string   $transactionType Transaction type
+     * @param stdClass $soapResult      SOAP result
+     * 
+     * @return boolean 
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 17.07.2011
+     */
+    protected function handleSoapResult($transactionType, $soapResult) {
+        $result = false;
+        if ($soapResult->status == 'ERROR') {
+            $message = 'ERROR #' . $soapResult->errorDetails->retErrorcode;
+            $message .= ' on transaction #' . $this->shopper_id;
+            $message .= ': ' . $soapResult->errorDetails->retErrorMsg;
+            $message .= '; ' . $soapResult->errorDetails->retAdditionalMsg;
+            $this->Log($transactionType, $message);
+        } else {
+            $result = true;
+            $this->Log($transactionType, $transactionType . ' for transaction #' . $this->shopper_id . ' successful');
+        }
+        $this->updateFromSoapResult($transactionType, $soapResult);
+        return $result;
+    }
+    
+    /**
+     * Updates the iPayment order from the given SOAP result.
+     *
+     * @param string   $transactionType Transaction type
+     * @param stdClass $soapResult      SOAP result
+     * 
+     * @return boolean 
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 17.07.2011
+     */
+    protected function updateFromSoapResult($transactionType, $soapResult) {
+        $this->status   = $soapResult->status;
+        $this->trx_typ  = $transactionType;
+        if ($soapResult->status == 'ERROR') {
+            $this->ret_errorcode            = $soapResult->errorDetails->retErrorcode;
+        } else {
+            $this->ret_transdate            = $soapResult->successDetails->retTransDate;
+            $this->ret_transtime            = $soapResult->successDetails->retTransTime;
+            $this->ret_trx_number           = $soapResult->successDetails->retTrxNumber;
+            $this->ret_authcode             = $soapResult->successDetails->retAuthCode;
+            $this->trx_paymentmethod        = $soapResult->paymentMethod;
+            $this->trx_paymentdata_country  = $soapResult->trxPaymentDataCountry;
+            $this->trx_remoteip_country     = $soapResult->trxRemoteIpCountry;
+        }
+        $this->write();
+    }
 
     /**
      * Saves the iPayment session ID to the session.
