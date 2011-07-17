@@ -661,11 +661,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string 
      */
     public function getTransactionType() {
-        $transactionType = 'auth';
-        if ($this->ShowFormFieldsOnPaymentSelection) {
-            $transactionType = 'preauth';
-        }
-        return $transactionType;
+        return 'preauth';
     }
     
     /**
