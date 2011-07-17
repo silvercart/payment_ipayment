@@ -136,7 +136,9 @@ class SilvercartPaymentIPaymentPpCheckoutFormStep1 extends SilvercartPaymentIPay
      */
     public function fillInFieldValues() {
         // some values for hidden fields
-        $this->formFields['ipayment_session_id']['value']   = $this->paymentMethodObj->getSessionId();
+        if ($this->controller->currentStepIsPaymentStep()) {
+            $this->formFields['ipayment_session_id']['value']   = $this->getPaymentMethod()->getSessionId();
+        }
         $this->formFields['error_lang']['value']            = substr(Translatable::get_current_locale(), 0, 2);
     }
 

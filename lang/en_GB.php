@@ -39,6 +39,7 @@ $lang['en_GB']['SilvercartHandlingCostIPayment']['SINGULARNAME'] = 'Handling Cos
 
 $lang['en_GB']['SilvercartOrderStatus']['IPAYMENT_CANCELED'] = 'iPayment canceled';
 $lang['en_GB']['SilvercartOrderStatus']['IPAYMENT_ERROR'] = 'iPayment error';
+$lang['en_GB']['SilvercartOrderStatus']['IPAYMENT_PREAUTH'] = 'payment authorized';
 
 $lang['en_GB']['SilvercartPaymentIPayment']['ACCOUNT_ID'] = 'Account ID';
 $lang['en_GB']['SilvercartPaymentIPayment']['API_URL'] = 'URL to iPayment Silent CGI Checkout';
@@ -67,11 +68,13 @@ $lang['en_GB']['SilvercartPaymentIPayment']['ERROR_MISSING_BRANCH_CODE'] = 'This
 $lang['en_GB']['SilvercartPaymentIPayment']['ERROR_INVALID_BRANCH_CODE'] = 'Invalid branch code';
 $lang['en_GB']['SilvercartPaymentIPayment']['ERROR_MISSING_CHECKCODE'] = 'This field cannot be empty.';
 $lang['en_GB']['SilvercartPaymentIPayment']['ERROR_INVALID_CELLPHONE'] = 'Invalid cell phone';
+$lang['en_GB']['SilvercartPaymentIPayment']['ERROR_CAPTURE'] = 'Capturing of the payment failed';
 $lang['en_GB']['SilvercartPaymentIPayment']['INFOTEXT_CHECKOUT'] = 'Payment via iPayment';
 $lang['en_GB']['SilvercartPaymentIPayment']['IPAYMENT_API'] = 'iPayment API';
 $lang['en_GB']['SilvercartPaymentIPayment']['NAME'] = 'iPayment';
 $lang['en_GB']['SilvercartPaymentIPayment']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Proceed to payment';
 $lang['en_GB']['SilvercartPaymentIPayment']['ORDERSTATUS_PAYED'] = 'Order status "payed"';
+$lang['en_GB']['SilvercartPaymentIPayment']['ORDERSTATUS_PREAUTH'] = 'Order status "payment preauth"';
 $lang['en_GB']['SilvercartPaymentIPayment']['ORDERSTATUS_CANCELED'] = 'Order status "canceled"';
 $lang['en_GB']['SilvercartPaymentIPayment']['ORDERSTATUS_ERROR'] = 'Order status "error"';
 $lang['en_GB']['SilvercartPaymentIPayment']['PASSWORD'] = 'Password';

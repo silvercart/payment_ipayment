@@ -117,7 +117,9 @@ class SilvercartPaymentIPaymentCcNestedForm extends SilvercartPaymentIPaymentNes
      */
     public function fillInFieldValues() {
         // some values for hidden fields
-        $this->formFields['ipayment_session_id']['value']   = $this->getPaymentMethod()->getSessionId();
+        if ($this->controller->currentStepIsPaymentStep()) {
+            $this->formFields['ipayment_session_id']['value']   = $this->getPaymentMethod()->getSessionId();
+        }
         $this->formFields['error_lang']['value']            = substr(Translatable::get_current_locale(), 0, 2);
         // localed form field titles
         $this->formFields['addr_name']['title']         = _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.ADDR_NAME');

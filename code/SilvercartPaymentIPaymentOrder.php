@@ -280,6 +280,9 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
                 $this->getPaymentMethod()->errorOccured = true;
                 $this->addError(_t('SilvercartPaymentIPayment.ERROR_CAPTURE'));
             }
+        } else {
+            $this->Log('capture', 'transaction type ' . $this->trx_typ . ' not within allowed types:');
+            $this->Log('capture', var_export(self::$allowedCaptureTypes, true));
         }
         return $iPaymentCaptureResult;
     }
@@ -343,6 +346,9 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
                 $this->getPaymentMethod()->errorOccured = true;
                 $this->addError(_t('SilvercartPaymentIPayment.ERROR_PREAUTH'));
             }
+        } else {
+            $this->Log('re_preauth', 'transaction type ' . $this->trx_typ . ' not within allowed types:');
+            $this->Log('re_preauth', var_export(self::$allowedReverseTypes, true));
         }
         return $iPaymentRePreauthResult;
     }
@@ -375,6 +381,9 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
                 $this->getPaymentMethod()->errorOccured = true;
                 $this->addError(_t('SilvercartPaymentIPayment.ERROR_REVERSE'));
             }
+        } else {
+            $this->Log('reverse', 'transaction type ' . $this->trx_typ . ' not within allowed types:');
+            $this->Log('reverse', var_export(self::$allowedReverseTypes, true));
         }
         return $iPaymentReverseResult;
     }

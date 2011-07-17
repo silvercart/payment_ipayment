@@ -508,6 +508,36 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     // ------------------------------------------------------------------------
     // processing methods
     // ------------------------------------------------------------------------
+    
+    /**
+     * Checks whether the transaction amount has changed since last iPayment
+     * connection.
+     * 
+     * @param string $amount        iPayment transaction amount
+     * @param string $transactionID iPayment transaction ID
+     *
+     * @return void
+     *
+     * @author Sebastian Diel <me@sdiel.de>
+     * @since 17.07.2011
+     */
+    public function checkTransactionAmount($amount, $transactionID = null) {
+        if (Session::get('ipayment_session_amount.' . $this->PaymentChannel) != $amount) {
+            if (is_null($transactionID)) {
+                $transactionID = $this->getTransactionID();
+            }
+            $iPaymentOrder = $this->getIPaymentOrder($transactionID);
+            if ($iPaymentOrder && in_array($iPaymentOrder->trx_typ, SilvercartPaymentIPaymentOrder::$allowedReverseTypes)) {
+                $iPaymentOrder->reverse();
+                $iPaymentOrder->trx_amount = $amount;
+                $iPaymentOrder->rePreAuthorize();
+                Session::set('ipayment_session_amount.' .   $this->PaymentChannel, $amount);
+                Session::save();
+            } else {
+                $this->createSessionId();
+            }
+        }
+    }
 
     /**
      * Returns the iPayment session ID. If the session ID doesn't exists, it will
@@ -518,20 +548,11 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     public function getSessionId() {
         if (!Session::get('ipayment_session_id.' . $this->PaymentChannel)
          || $this->SessionExpired()) {
-            $this->createSessionId();
-        }
-        $amount = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
-        if (Session::get('ipayment_session_amount.' . $this->PaymentChannel) != $amount) {
             $iPaymentOrder = $this->getIPaymentOrder($this->getTransactionID());
-            if ($iPaymentOrder && in_array($iPaymentOrder->trx_typ, SilvercartPaymentIPaymentOrder::$allowedReverseTypes)) {
-                $iPaymentOrder->reverse();
-                $iPaymentOrder->trx_amount = $amount;
-                $iPaymentOrder->rePreAuthorize();
-                Session::set('ipayment_session_amount.' .   $this->PaymentChannel, $amount);
-                Session::save();
-            } else {
-                $this->createSessionId();
-            }
+            $this->createSessionId();
+        } else {
+            $amount = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
+            $this->checkTransactionAmount($amount);
         }
         return Session::get('ipayment_session_id.' . $this->PaymentChannel);
     }

@@ -116,6 +116,11 @@ class SilvercartPaymentIPaymentNestedForm extends SilvercartCheckoutFormStep4Def
                 $this->controller->NextStep();
                 return true;
             }
+        } elseif ($this->controller->isStepCompleted(3)) {
+            if ($this->getPaymentMethod()->getIPaymentOrder(SilvercartNumberRange::reserveNewNumberByIdentifier('OrderNumber'))) {
+                $amount = (string) ((float) $this->getPaymentMethod()->getShoppingCart()->getAmountTotal()->getAmount() * 100);
+                $this->getPaymentMethod()->checkTransactionAmount($amount);
+            }
         }
         return false;
     }

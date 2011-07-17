@@ -57,22 +57,26 @@ class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCh
                 $checkoutData['PaymentMethod']
             )
         );
-        if ($this->getPaymentMethod()) {
-            $this->getPaymentMethod()->clearSessionId();
-        }
         $checkoutData = $this->controller->getCombinedStepData();
         $order = DataObject::get_one('SilvercartOrder', sprintf("`ID`='%s'", $checkoutData['orderId']));
         $shopper_id = $order->OrderNumber;
-        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $shopper_id));
+        $iPaymentOrder = $this->getPaymentMethod()->getIPaymentOrder($shopper_id);
         $status = $iPaymentOrder->ret_status;
+        if ($iPaymentOrder) {
+            $this->getPaymentMethod()->checkTransactionAmount($order->AmountTotal->getAmount(), $shopper_id);
+        }
+        if ($this->getPaymentMethod()) {
+            $this->getPaymentMethod()->clearSessionId();
+        }
         if (in_array($status, $this->getPaymentMethod()->successIPaymentStatus)) {
             // transaction successful
             if (in_array($iPaymentOrder->trx_typ, $this->getPaymentMethod()->payedIPaymentType)) {
                 $order->setOrderStatusByID($this->getPaymentMethod()->PaidOrderStatus);
+                $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' successful.');
             } else {
                 $order->setOrderStatusByID($this->getPaymentMethod()->PreauthOrderStatus);
+                $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'preauth #' . $shopper_id . ' successful.');
             }
-            $this->getPaymentMethod()->Log('SilvercartPaymentIPaymentCheckoutFormStepProcessOrder', 'transaction #' . $shopper_id . ' successful.');
         } elseif (in_array($status, $this->getPaymentMethod()->failedIPaymentStatus)) {
             // transaction failed
             $order->setOrderStatusByID($this->getPaymentMethod()->CanceledOrderStatus);

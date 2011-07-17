@@ -34,7 +34,6 @@ if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
     $lang['de_DE'] = $lang['en_US'];
 }
 
-
 $lang['de_DE']['SilvercartHandlingCostIPayment']['PLURALNAME'] = 'Gebühren';
 $lang['de_DE']['SilvercartHandlingCostIPayment']['SINGULARNAME'] = 'Gebühr';
 
@@ -75,6 +74,7 @@ $lang['de_DE']['SilvercartPaymentIPayment']['IPAYMENT_API'] = 'iPayment API';
 $lang['de_DE']['SilvercartPaymentIPayment']['NAME'] = 'iPayment';
 $lang['de_DE']['SilvercartPaymentIPayment']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Weiter zur Bezahlung';
 $lang['de_DE']['SilvercartPaymentIPayment']['ORDERSTATUS_PAYED'] = 'Bestellstatus für Meldung "bezahlt"';
+$lang['de_DE']['SilvercartPaymentIPayment']['ORDERSTATUS_PREAUTH'] = 'Bestellstatus für Meldung "Zahlung vorauthorisiert"';
 $lang['de_DE']['SilvercartPaymentIPayment']['ORDERSTATUS_CANCELED'] = 'Bestellstatus für Meldung "abgebrochen"';
 $lang['de_DE']['SilvercartPaymentIPayment']['ORDERSTATUS_ERROR'] = 'Bestellstatus für Meldung "Fehler"';
 $lang['de_DE']['SilvercartPaymentIPayment']['PASSWORD'] = 'Anwendungspasswort';
