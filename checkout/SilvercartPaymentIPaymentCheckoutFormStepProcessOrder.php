@@ -64,7 +64,7 @@ class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCh
         $status = $iPaymentOrder->ret_status;
         if ($iPaymentOrder) {
             $this->getPaymentMethod()->checkTransactionAmount($order->AmountTotal->getAmount(), $shopper_id);
-            if (!$this->CaptureTransactionOnOrderStatusChange) {
+            if (!$this->getPaymentMethod()->CaptureTransactionOnOrderStatusChange) {
                 if (in_array($iPaymentOrder->trx_typ, SilvercartPaymentIPaymentOrder::$allowedCaptureTypes)) {
                     $iPaymentOrder->capture();
                 }
