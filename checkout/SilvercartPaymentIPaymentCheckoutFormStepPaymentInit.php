@@ -43,6 +43,7 @@ class SilvercartPaymentIPaymentCheckoutFormStepPaymentInit extends SilvercartChe
      */
     public function process() {
         if (parent::process()) {
+            $this->initializeShoppingCart();
             if (array_key_exists('ret_status', $_GET)) {
                 if (in_array($_GET['ret_status'], $this->paymentMethodObj->failedIPaymentStatus)) {
                     // an error occured
@@ -83,6 +84,26 @@ class SilvercartPaymentIPaymentCheckoutFormStepPaymentInit extends SilvercartChe
                     $this->controller->NextStep();
                 }
             }
+        }
+    }
+    
+    /**
+     * Initializes the ShoppingCart with ShippingMethod and PaymentMethod.
+     * Workaround
+     * 
+     * @return void
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 06.09.2011
+     */
+    protected function initializeShoppingCart() {
+        // workaround to initialize the shoppingcart
+        $stepData       = $this->controller->getCombinedStepData();
+        if (isset($stepData['ShippingMethod'])) {
+            $this->getPaymentMethod()->getShoppingCart()->setShippingMethodID($stepData['ShippingMethod']);
+        }
+        if (isset($stepData['PaymentMethod'])) {
+            $this->getPaymentMethod()->getShoppingCart()->setPaymentMethodID($stepData['PaymentMethod']);
         }
     }
 }

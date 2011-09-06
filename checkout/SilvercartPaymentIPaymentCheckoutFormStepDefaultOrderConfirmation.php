@@ -50,6 +50,17 @@ class SilvercartPaymentIPaymentCheckoutFormStepDefaultOrderConfirmation extends 
      */
     public function __construct($controller, $params = null, $preferences = null, $barebone = false) {
         parent::__construct($controller, $params, $preferences, $barebone);
+    }
+    
+    /**
+     * processor method
+     *
+     * @return void
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 06.09.2011
+     */
+    public function process() {
         Session::clear('ipayment_session_id');
         Session::save();
     }

@@ -633,20 +633,21 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      */
     protected function createSessionId() {
         $iPaymentSessionID = false;
-        $amount         = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
-        $currency       = $this->getShoppingCart()->getAmountTotal()->getCurrency();
-        $transactionId  = $this->getTransactionID();
-        
-        $iPaymentOrder = $this->createIPaymentOrder(
-                $transactionId,
-                array(
-                    'trx_amount'        => $amount,
-                    'trx_currency'      => $currency,
-                    'shopper_id'        => $transactionId,
-                    'trx_paymenttyp'    => $this->PaymentChannel,
-                )
-        );
-        $iPaymentSessionID = $iPaymentOrder->createSession();
+        if ($this->getShoppingCart()->SilvercartShippingMethodID > 0) {
+            $amount         = (string) ((float) $this->getShoppingCart()->getAmountTotal()->getAmount() * 100);
+            $currency       = $this->getShoppingCart()->getAmountTotal()->getCurrency();
+            $transactionId  = $this->getTransactionID();
+            $iPaymentOrder = $this->createIPaymentOrder(
+                    $transactionId,
+                    array(
+                        'trx_amount'        => $amount,
+                        'trx_currency'      => $currency,
+                        'shopper_id'        => $transactionId,
+                        'trx_paymenttyp'    => $this->PaymentChannel,
+                    )
+            );
+            $iPaymentSessionID = $iPaymentOrder->createSession();
+        }
         return $iPaymentSessionID;
     }
 
@@ -753,7 +754,11 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return string
      */
     public function getCancelLink() {
-        return Director::absoluteURL(Controller::curr()->Link()) . 'GotoStep/3';
+        $cancelLink = Director::absoluteURL(Controller::curr()->Link());
+        if ($this->ShowFormFieldsOnPaymentSelection) {
+            $cancelLink = Director::absoluteURL(Controller::curr()->Link()) . 'GotoStep/3';
+        }
+        return $cancelLink;
     }
 
     // ------------------------------------------------------------------------
@@ -802,7 +807,6 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * to the configured one.
      *
      * @param SilvercartOrder $order Order
-     * 
      *
      * @return void
      *
