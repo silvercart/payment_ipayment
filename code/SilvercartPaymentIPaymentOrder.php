@@ -181,6 +181,8 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
     
     /**
      * Returns the AccountData for the SoapClient. Creates them if not exists.
+     * 
+     * @param bool $withAdminPassword Set this to true when the admin password is needed (caputure, preauth, repreauth, reverse)
      *
      * @return array
      */
@@ -443,7 +445,9 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
             $this->ret_authcode             = $soapResult->successDetails->retAuthCode;
             $this->trx_paymentmethod        = $soapResult->paymentMethod;
             $this->trx_paymentdata_country  = $soapResult->trxPaymentDataCountry;
-            $this->trx_remoteip_country     = $soapResult->trxRemoteIpCountry;
+            if (isset($soapResult->trxRemoteIpCountry)) {
+                $this->trx_remoteip_country     = $soapResult->trxRemoteIpCountry;
+            }
         }
         $this->write();
     }
