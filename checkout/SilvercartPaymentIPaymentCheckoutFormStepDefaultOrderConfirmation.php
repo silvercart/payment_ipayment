@@ -18,14 +18,14 @@
  * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  */
 
 /**
  * Default order confirmation step for iPayment.
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  * @author Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright 2011 pixeltricks GmbH
  * @since 22.06.2011

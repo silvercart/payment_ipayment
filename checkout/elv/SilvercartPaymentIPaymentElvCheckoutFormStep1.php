@@ -18,14 +18,14 @@
  * along with SilvercartPaymentIPayment.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  */
 
 /**
  * First form step for iPayment Direct Debit
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  * @author Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright 2011 pixeltricks GmbH
  * @since 04.04.2011

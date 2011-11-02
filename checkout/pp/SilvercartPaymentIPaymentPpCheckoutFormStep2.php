@@ -18,14 +18,14 @@
  * along with SilvercartPaymentIPayment.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  */
 
 /**
  * Second form step for iPayment PrePaid payment.
  *
  * @package Silvercart
- * @subpackage Payment
+ * @subpackage Forms
  * @author Sebastian Diel <sdiel@pixeltricks.de>
  * @copyright 2011 pixeltricks GmbH
  * @since 04.04.2011
