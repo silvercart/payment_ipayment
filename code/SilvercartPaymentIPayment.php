@@ -92,7 +92,6 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'iPaymentSoapServerUrl_Live' => 'VarChar(255)',
         'iPaymentApiServerUrl_Dev' => 'VarChar(255)',
         'iPaymentApiServerUrl_Live' => 'VarChar(255)',
-        'iPaymentInfotextCheckout' => 'VarChar(255)',
         'PaidOrderStatus' => 'Int',
         'PreauthOrderStatus' => 'Int',
         'CanceledOrderStatus' => 'Int',
@@ -111,6 +110,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'iPaymentApiServerUrl' => 'VarChar(255)',
         'iPaymentServerIPs' => 'VarChar(255)',
         'iPaymentSoapServerUrl' => 'VarChar(255)',
+        'iPaymentInfotextCheckout' => 'VarChar(255)'
     );
 
     /**
@@ -146,6 +146,19 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
     public static $has_one = array(
         'SilvercartHandlingCost' => 'SilvercartHandlingCostIPayment'
     );
+    
+    /**
+     * 1:n relationships.
+     *
+     * @var array
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 30.01.2012
+     */
+    public static $has_many = array(
+        'SilvercartPaymentIPaymentLanguages' => 'SilvercartPaymentIPaymentLanguage'
+    );
+    
     /**
      * contains module name for display in the admin backend
      *
@@ -335,7 +348,6 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                     'iPaymentSoapServerUrl_Live'        => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
                     'iPaymentApiServerUrl_Dev'          => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
                     'iPaymentApiServerUrl_Live'         => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
-                    'iPaymentInfotextCheckout'          => _t('SilvercartPaymentIPayment.INFOTEXT_CHECKOUT', 'payment via iPayment'),
                     'PaidOrderStatus'                   => _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED', 'orderstatus for notification "payed"'),
                     'PreauthOrderStatus'                => _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH', 'orderstatus for notification "preauth"'),
                     'CanceledOrderStatus'               => _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED', 'orderstatus for notification "canceled"'),
@@ -368,7 +380,8 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection, 'isActive');
         $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField, 'isActive');
         $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField, 'isActive');
-
+        $fields->addFieldToTab('Sections.Translations', new ComplexTableField($this, 'SilvercartPaymentIPaymentLanguages', 'SilvercartPaymentIPaymentLanguage'));
+        
         // Additional tabs and fields -----------------------------------------
         $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
         $tabOrderStatus = new Tab('OrderStatus', _t('SilvercartPaymentIPayment.ATTRIBUTED_ORDERSTATUS', 'attributed order status'));
@@ -526,6 +539,22 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
             $serverIPs = $this->iPaymentServerIPs_Dev;
         }
         return $serverIPs;
+    }
+    
+    /**
+     * getter for the multilingual attribute iPaymentInfotextCheckout
+     *
+     * @return string 
+     * 
+     * @author Roland Lehmann <rlehmann@pixeltricks.de>
+     * @since 30.01.2012
+     */
+    public function getiPaymentInfotextCheckout() {
+        $text = '';
+        if ($this->getLanguage()) {
+            $text = $this->getLanguage()->iPaymentInfotextCheckout;
+        }
+        return $text;
     }
 
     // ------------------------------------------------------------------------
