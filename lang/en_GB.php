@@ -92,6 +92,9 @@ $lang['en_GB']['SilvercartPaymentIPayment']['SOAP_URL'] = 'URL of the iPayment S
 $lang['en_GB']['SilvercartPaymentIPayment']['TITLE'] = 'iPayment';
 $lang['en_GB']['SilvercartPaymentIPayment']['USER_ID'] = 'User ID';
 
+$lang['en_GB']['SilvercartPaymentIPaymentLanguage']['SINGULARNAME'] = 'Translation of the payment method iPayment';
+$lang['en_GB']['SilvercartPaymentIPaymentLanguage']['PLURALNAME'] = 'Translations of the payment method iPayment';
+
 $lang['en_GB']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['ADDR_NAME'] = 'Cardholder';
 $lang['en_GB']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['CC_CHECKCODE'] = 'Checkcode';
 $lang['en_GB']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['CC_CHECKCODE_HINT'] = 'The last 3 digits on the back of your credit card. (Amex: 4 digits in front)';

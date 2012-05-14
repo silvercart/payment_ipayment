@@ -18,8 +18,9 @@
  * along with SilvercartPrepaymentPayment.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @package Silvercart
- * @subpackage Config
+ * @subpackage iPayment
  * @ignore
  */
 
 CustomHtmlForm::registerModule('silvercart_payment_ipayment', 50);
+DataObject::add_extension('SilvercartPaymentIPayment',         'SilvercartDataObjectMultilingualDecorator');

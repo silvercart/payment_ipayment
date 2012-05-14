@@ -92,6 +92,9 @@ $lang['de_DE']['SilvercartPaymentIPayment']['SOAP_URL'] = 'URL zur iPayment SOAP
 $lang['de_DE']['SilvercartPaymentIPayment']['TITLE'] = 'iPayment';
 $lang['de_DE']['SilvercartPaymentIPayment']['USER_ID'] = 'Anwendungs-ID';
 
+$lang['de_DE']['SilvercartPaymentIPaymentLanguage']['SINGULARNAME'] = 'Übersetzung der Zahlart iPayment';
+$lang['de_DE']['SilvercartPaymentIPaymentLanguage']['PLURALNAME'] = 'Übersetzungen der Zahlart iPayment';
+
 $lang['de_DE']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['ADDR_NAME'] = 'Karteninhaber';
 $lang['de_DE']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['CC_CHECKCODE'] = 'Prüfziffer';
 $lang['de_DE']['SilvercartPaymentIPaymentCcCheckoutFormStep1']['CC_CHECKCODE_HINT'] = 'Die letzten 3 Ziffern auf der Rückseite Ihrer Kreditkarte. (Amex: 4 Ziffern auf der Vorderseite)';
