@@ -262,7 +262,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         );
 
         foreach ($requiredStatus as $code => $title) {
-            if (!DataObject::get_one('SilvercartOrderStatus', sprintf("`Code`='%s'", $code))) {
+            if (!DataObject::get_one('SilvercartOrderStatus', sprintf("`Code`='%s'", $code), true, "SilvercartOrderStatus.ID")) {
                 $silvercartOrderStatus = new SilvercartOrderStatus();
                 $silvercartOrderStatus->Title = $title;
                 $silvercartOrderStatus->Code = $code;
@@ -280,7 +280,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         }
         // check, whether images exist
         foreach ($paymentLogos as $paymentChannel => $logos) {
-            $paymentChannelMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("`PaymentChannel`='%s'", $paymentChannel));
+            $paymentChannelMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("`PaymentChannel`='%s'", $paymentChannel), true, "SilvercartPaymentIPayment.ID");
             if ($paymentChannelMethod) {
                 if ($paymentChannelMethod->PaymentLogos()->Count() == 0 && $paymentChannelMethod->showPaymentLogos) {
                     foreach ($logos as $title => $logo) {
