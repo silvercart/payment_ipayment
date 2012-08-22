@@ -24,3 +24,6 @@
 
 CustomHtmlForm::registerModule('silvercart_payment_ipayment', 50);
 DataObject::add_extension('SilvercartPaymentIPayment',         'SilvercartDataObjectMultilingualDecorator');
+
+Requirements::add_i18n_javascript('silvercart_payment_ipayment/javascript/lang');
+Requirements::themedCSS('silvercart_payment_ipayment');
