@@ -32,6 +32,14 @@
         $CustomHtmlFormFieldByName(error_lang,CustomHtmlFormFieldHidden)
         $CustomHtmlFormFieldByName(noparams_on_redirect_url,CustomHtmlFormFieldHidden)
         $CustomHtmlFormFieldByName(noparams_on_error_url,CustomHtmlFormFieldHidden)
+        
+        $CustomHtmlFormFieldByName(addr_street,CustomHtmlFormFieldHidden)
+        $CustomHtmlFormFieldByName(addr_street_number,CustomHtmlFormFieldHidden)
+        $CustomHtmlFormFieldByName(addr_street2,CustomHtmlFormFieldHidden)
+        $CustomHtmlFormFieldByName(addr_city,CustomHtmlFormFieldHidden)
+        $CustomHtmlFormFieldByName(addr_zip,CustomHtmlFormFieldHidden)
+        $CustomHtmlFormFieldByName(addr_country,CustomHtmlFormFieldHidden)
+        
         <legend><% _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.CC_DATA','Your credit card data') %></legend>
         <p><% _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.SECURITY_HINT') %></p>
         $CustomHtmlFormFieldByName(addr_name)

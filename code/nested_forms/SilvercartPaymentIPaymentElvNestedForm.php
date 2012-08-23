@@ -56,6 +56,38 @@ class SilvercartPaymentIPaymentElvNestedForm extends SilvercartPaymentIPaymentNe
             'type'              => 'HiddenField',
             'value'             => '0',
         ),
+
+        'addr_street' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'Street',
+            'value'             => '',
+        ),
+        'addr_street_number' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'Street number',
+            'value'             => '',
+        ),
+        'addr_street2' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'Street addition',
+            'value'             => '',
+        ),
+        'addr_city' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'City',
+            'value'             => '',
+        ),
+        'addr_zip' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'ZIP',
+            'value'             => '',
+        ),
+        'addr_country' => array(
+            'type'              => 'HiddenField',
+            'title'             => 'Country',
+            'value'             => '',
+        ),
+        
         // bank account fields
         'addr_name' => array(
             'type'              => 'TextField',
@@ -107,6 +139,16 @@ class SilvercartPaymentIPaymentElvNestedForm extends SilvercartPaymentIPaymentNe
             $this->formFields['ipayment_session_id']['value']   = $this->getPaymentMethod()->getSessionId();
         }
         $this->formFields['error_lang']['value']            = substr(Translatable::get_current_locale(), 0, 2);
+        
+        $invoiceAddress = $this->Controller()->getInvoiceAddress();
+        
+        $this->formFields['addr_street']['value']           = $invoiceAddress->Street;
+        $this->formFields['addr_street_number']['value']    = $invoiceAddress->StreetNumber;
+        $this->formFields['addr_street2']['value']          = $invoiceAddress->Addition;
+        $this->formFields['addr_city']['value']             = $invoiceAddress->City;
+        $this->formFields['addr_zip']['value']              = $invoiceAddress->Postcode;
+        $this->formFields['addr_country']['value']          = $invoiceAddress->SilvercartCountry()->ISO2;
+        
         // localed form field titles
         $this->formFields['addr_name']['value']             = $this->getPaymentMethod()->getInvoiceAddress()->FirstName . ' ' . $this->getPaymentMethod()->getInvoiceAddress()->Surname;
         $this->formFields['addr_name']['title']             = _t('SilvercartPaymentIPaymentElvCheckoutFormStep1.ADDR_NAME');
