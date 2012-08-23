@@ -94,7 +94,7 @@ class SilvercartPaymentIPaymentNestedForm extends SilvercartCheckoutFormStep4Def
                 } else {
                     $this->addMessage($this->getPaymentMethod()->getErrorMessage($_GET['ret_errorcode']));
                 }
-                $this->getPaymentMethod()->Log('error', 'error  ' . $_GET['ret_errorcode'] . ': ' . $_GET['ret_errormsg'] . '; transaction: ' . $_GET['shopper_id']);
+                $this->getPaymentMethod()->Log('error', 'error ' . $_GET['ret_errorcode'] . ': ' . $_GET['ret_errormsg'] . '; transaction: ' . $_GET['shopper_id']);
                 $ipayment_session_id = $this->dataFieldByName('ipayment_session_id');
                 $ipayment_session_id->setValue($this->getPaymentMethod()->refreshSessionId());
                 
