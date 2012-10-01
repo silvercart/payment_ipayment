@@ -252,7 +252,6 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
             'ipayment_canceled' => _t('SilvercartOrderStatus.IPAYMENT_CANCELED', 'iPayment canceled'),
             'ipayment_error'    => _t('SilvercartOrderStatus.IPAYMENT_ERROR', 'iPayment error'),
         );
-        
         $paymentLogos = array(
             'cc' => array(
                 'American Express'  => '/silvercart_payment_ipayment/images/american-express.png',
@@ -261,50 +260,8 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
             ),
         );
 
-        foreach ($requiredStatus as $code => $title) {
-            if (!DataObject::get_one('SilvercartOrderStatus', sprintf("`Code`='%s'", $code), true, "SilvercartOrderStatus.ID")) {
-                $silvercartOrderStatus = new SilvercartOrderStatus();
-                $silvercartOrderStatus->Title = $title;
-                $silvercartOrderStatus->Code = $code;
-                $silvercartOrderStatus->write();
-            }
-        }
-        
-        $upladsFolder = DataObject::get_one('Folder', "`Name`='Uploads'");
-        if (!$upladsFolder) {
-            $upladsFolder = new Folder();
-            $upladsFolder->Name = 'Uploads';
-            $upladsFolder->Title = 'Uploads';
-            $upladsFolder->Filename = 'assets/Uploads/';
-            $upladsFolder->write();
-        }
-        // check, whether images exist
-        foreach ($paymentLogos as $paymentChannel => $logos) {
-            $paymentChannelMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("`PaymentChannel`='%s'", $paymentChannel), true, "SilvercartPaymentIPayment.ID");
-            if ($paymentChannelMethod) {
-                if ($paymentChannelMethod->PaymentLogos()->Count() == 0 && $paymentChannelMethod->showPaymentLogos) {
-                    foreach ($logos as $title => $logo) {
-                        $paymentLogo = new SilvercartImage();
-                        $paymentLogo->Title = $title;
-                        $storedLogo = DataObject::get_one('Image', sprintf("`Name`='%s'", basename($logo)));
-                        if ($storedLogo) {
-                            $paymentLogo->ImageID = $storedLogo->ID;
-                        } else {
-                            file_put_contents(Director::baseFolder() . '/' . $upladsFolder->Filename . basename($logo), file_get_contents(Director::baseFolder() . $logo));
-                            $image = new Image();
-                            $image->setFilename($upladsFolder->Filename . basename($logo));
-                            $image->setName(basename($logo));
-                            $image->Title = basename($logo, '.png');
-                            $image->ParentID = $upladsFolder->ID;
-                            $image->write();
-                            $paymentLogo->ImageID = $image->ID;
-                        }
-                        $paymentLogo->write();
-                        $paymentChannelMethod->PaymentLogos()->add($paymentLogo);
-                    }
-                }
-            }
-        }
+        parent::createRequiredOrderStatus($requiredStatus);
+        parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentIPayment');
 
         $iPaymentPayments = DataObject::get('SilvercartPaymentIPayment', "`PaidOrderStatus`=0");
         if ($iPaymentPayments) {
