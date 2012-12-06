@@ -164,8 +164,6 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
         $this->preferences['stepTitle']                         = _t('SilvercartPaymentIPaymentElvCheckoutFormStep1.TITLE', 'Bank Account Data');
         $this->preferences['submitButtonTitle']                 = _t('SilvercartPaymentIPaymentElvCheckoutFormStep1.CONFIRM', 'Confirm payment and order now');
         $this->preferences['fillInRequestValues']               = true;
-
-        Requirements::themedCSS('silvercart_payment_ipayment');
     }
 
     /**

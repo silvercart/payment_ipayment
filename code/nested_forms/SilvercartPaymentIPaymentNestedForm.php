@@ -49,7 +49,6 @@ class SilvercartPaymentIPaymentNestedForm extends SilvercartCheckoutFormStep4Def
     public function  __construct($controller, $params = null, $preferences = null, $barebone = false) {
         parent::__construct($controller, $params, $preferences, $barebone);
         $this->setFormAction($this->getPaymentMethod()->iPaymentApiServerUrl);
-        Requirements::add_i18n_javascript('silvercart_payment_ipayment/javascript/lang');
     }
 
     /**
@@ -62,7 +61,6 @@ class SilvercartPaymentIPaymentNestedForm extends SilvercartCheckoutFormStep4Def
      */
     public function preferences() {
         parent::preferences();
-        Requirements::themedCSS('silvercart_payment_ipayment');
         $this->getPaymentMethod()->setCancelLink(Director::absoluteURL($this->controller->Link()));
     }
 

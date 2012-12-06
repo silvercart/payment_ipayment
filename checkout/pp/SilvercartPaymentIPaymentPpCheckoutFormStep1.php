@@ -122,8 +122,6 @@ class SilvercartPaymentIPaymentPpCheckoutFormStep1 extends SilvercartPaymentIPay
         $this->preferences['stepTitle']                         = _t('SilvercartPaymentIPaymentPpCheckoutFormStep1.TITLE', 'PaySafeCard Data');
         $this->preferences['submitButtonTitle']                 = _t('SilvercartPaymentIPaymentPpCheckoutFormStep1.CONFIRM', 'Confirm payment and order now');
         $this->preferences['fillInRequestValues']               = true;
-
-        Requirements::themedCSS('silvercart_payment_ipayment');
     }
 
     /**
