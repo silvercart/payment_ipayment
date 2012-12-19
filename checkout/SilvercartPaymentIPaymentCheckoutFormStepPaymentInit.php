@@ -58,6 +58,10 @@ class SilvercartPaymentIPaymentCheckoutFormStepPaymentInit extends SilvercartChe
                             )
                         );
                     } else {
+                        $this->addErrorMessage('addr_name',         $this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
+                        $this->addErrorMessage('cc_number',         $this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
+                        $this->addErrorMessage('cc_checkcode',      $this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
+                        $this->addErrorMessage('cc_expdate_month',  $this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
                         $this->addMessage($this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
                     }
                     $this->paymentMethodObj->Log('error', 'error  ' . $_GET['ret_errorcode'] . ': ' . $_GET['ret_errormsg'] . '; transaction: ' . $_GET['shopper_id']);
