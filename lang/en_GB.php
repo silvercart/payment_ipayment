@@ -91,6 +91,7 @@ $lang['en_GB']['SilvercartPaymentIPayment']['SINGULARNAME'] = 'payment method';
 $lang['en_GB']['SilvercartPaymentIPayment']['SOAP_URL'] = 'URL of the iPayment SOAP Service WSDL';
 $lang['en_GB']['SilvercartPaymentIPayment']['TITLE'] = 'iPayment';
 $lang['en_GB']['SilvercartPaymentIPayment']['USER_ID'] = 'User ID';
+$lang['en_GB']['SilvercartPaymentIPayment']['USETRANSACTIONIDASINVOICETEXT'] = 'Use TransactionID (Order number) as invoice text';
 
 $lang['en_GB']['SilvercartPaymentIPaymentLanguage']['SINGULARNAME'] = 'Translation of the payment method iPayment';
 $lang['en_GB']['SilvercartPaymentIPaymentLanguage']['PLURALNAME'] = 'Translations of the payment method iPayment';

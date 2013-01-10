@@ -14,6 +14,9 @@
     $CustomHtmlFormFieldByName(addr_city,CustomHtmlFormFieldHidden)
     $CustomHtmlFormFieldByName(addr_zip,CustomHtmlFormFieldHidden)
     $CustomHtmlFormFieldByName(addr_country,CustomHtmlFormFieldHidden)
+    <% if PaymentMethod.UseTransactionIDAsInvoiceText %>
+        $CustomHtmlFormFieldByName(invoice_text,CustomHtmlFormFieldHidden)
+    <% end_if %>
 
     <fieldset>
         <legend><% _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.CC_DATA','Your credit card data') %></legend>

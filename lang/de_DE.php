@@ -94,6 +94,7 @@ $lang['de_DE']['SilvercartPaymentIPayment']['SINGULARNAME'] = 'Bezahlart';
 $lang['de_DE']['SilvercartPaymentIPayment']['SOAP_URL'] = 'URL zur iPayment SOAP Service WSDL';
 $lang['de_DE']['SilvercartPaymentIPayment']['TITLE'] = 'iPayment';
 $lang['de_DE']['SilvercartPaymentIPayment']['USER_ID'] = 'Anwendungs-ID';
+$lang['de_DE']['SilvercartPaymentIPayment']['USETRANSACTIONIDASINVOICETEXT'] = 'Bestellnummer als Rechungs-Referenz verwenden';
 
 $lang['de_DE']['SilvercartPaymentIPaymentLanguage']['SINGULARNAME'] = 'Übersetzung der Zahlart iPayment';
 $lang['de_DE']['SilvercartPaymentIPaymentLanguage']['PLURALNAME'] = 'Übersetzungen der Zahlart iPayment';

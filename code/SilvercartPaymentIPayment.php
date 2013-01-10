@@ -96,6 +96,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'PreauthOrderStatus' => 'Int',
         'CanceledOrderStatus' => 'Int',
         'ErrorOrderStatus' => 'Int',
+        'UseTransactionIDAsInvoiceText' => 'Boolean(0)',
         // Payment attributes
         'PaymentChannel' => 'Enum("cc,elv,pp","cc")',
         'CaptureTransactionOnOrderStatusChange' => 'Boolean',
@@ -290,32 +291,36 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return array
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.03.2011
+     * @since 09.01.2013
      */
     public function fieldLabels($includerelations = true) {
         return array_merge(
                 parent::fieldLabels($includerelations),
                 array(
                     // Base attributes
-                    'iPaymentAccountID_Dev'             => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
-                    'iPaymentAccountID_Live'            => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
-                    'iPaymentUserID_Dev'                => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
-                    'iPaymentUserID_Live'               => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
-                    'iPaymentPassword_Dev'              => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
-                    'iPaymentPassword_Live'             => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
-                    'iPaymentAdminPassword_Dev'         => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
-                    'iPaymentAdminPassword_Live'        => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
+                    'iPaymentAccountID_Dev'                 => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
+                    'iPaymentAccountID_Live'                => _t('SilvercartPaymentIPayment.ACCOUNT_ID', 'Account ID'),
+                    'iPaymentUserID_Dev'                    => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
+                    'iPaymentUserID_Live'                   => _t('SilvercartPaymentIPayment.USER_ID', 'User ID'),
+                    'iPaymentPassword_Dev'                  => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
+                    'iPaymentPassword_Live'                 => _t('SilvercartPaymentIPayment.PASSWORD', 'Password'),
+                    'iPaymentAdminPassword_Dev'             => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
+                    'iPaymentAdminPassword_Live'            => _t('SilvercartPaymentIPayment.PASSWORD_ADMIN', 'Admin password'),
                     // API attributes
-                    'iPaymentServerIPs_Dev'             => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
-                    'iPaymentServerIPs_Live'            => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
-                    'iPaymentSoapServerUrl_Dev'         => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
-                    'iPaymentSoapServerUrl_Live'        => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
-                    'iPaymentApiServerUrl_Dev'          => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
-                    'iPaymentApiServerUrl_Live'         => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
-                    'PaidOrderStatus'                   => _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED', 'orderstatus for notification "payed"'),
-                    'PreauthOrderStatus'                => _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH', 'orderstatus for notification "preauth"'),
-                    'CanceledOrderStatus'               => _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED', 'orderstatus for notification "canceled"'),
-                    'ErrorOrderStatus'                  => _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR', 'orderstatus for notification "error"'),
+                    'iPaymentServerIPs_Dev'                 => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
+                    'iPaymentServerIPs_Live'                => _t('SilvercartPaymentIPayment.SERVER_IPS', 'Server IPs'),
+                    'iPaymentSoapServerUrl_Dev'             => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
+                    'iPaymentSoapServerUrl_Live'            => _t('SilvercartPaymentIPayment.SOAP_URL', 'URL to the iPayment SOAP service WSDL'),
+                    'iPaymentApiServerUrl_Dev'              => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
+                    'iPaymentApiServerUrl_Live'             => _t('SilvercartPaymentIPayment.API_URL', 'URL to the iPayment checkout'),
+                    'PaidOrderStatus'                       => _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED', 'orderstatus for notification "payed"'),
+                    'PreauthOrderStatus'                    => _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH', 'orderstatus for notification "preauth"'),
+                    'CanceledOrderStatus'                   => _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED', 'orderstatus for notification "canceled"'),
+                    'ErrorOrderStatus'                      => _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR', 'orderstatus for notification "error"'),
+                    'UseTransactionIDAsInvoiceText'         => _t('SilvercartPaymentIPayment.USETRANSACTIONIDASINVOICETEXT', 'Use TransactionID (Order number) as invoice text'),
+                    'DisplayPaymentChannel'                 => _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL', 'Payment Channel'),
+                    'CaptureTransactionOnOrderStatusChange' => _t('SilvercartPaymentIPayment.CAPTURE_TRANSACTION_ON_ORDER_STATUS_CHANGE'),
+                    'CaptureOrderStatus'                    => _t('SilvercartPaymentIPayment.ORDERSTATUS_CAPTURE'),
                 )
         );
     }
@@ -328,22 +333,24 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @return FieldSet
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 29.03.2011
+     * @since 09.01.2013
      */
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFieldsForModules($params);
         $OrderStatus = DataObject::get('SilvercartOrderStatus');
 
         // Add fields to default tab ------------------------------------------
-        $channelField = new ReadonlyField('DisplayPaymentChannel', _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL'), $this->getPaymentChannelName($this->PaymentChannel));
-        $showFormFieldsOnPaymentSelection = new CheckboxField('ShowFormFieldsOnPaymentSelection', _t('SilvercartPaymentMethod.SHOW_FORM_FIELDS_ON_PAYMENT_SELECTION'), $this->ShowFormFieldsOnPaymentSelection);
-        $captureTransactionOnOrderStatusChangeField = new CheckboxField('CaptureTransactionOnOrderStatusChange', _t('SilvercartPaymentIPayment.CAPTURE_TRANSACTION_ON_ORDER_STATUS_CHANGE'), $this->CaptureTransactionOnOrderStatusChange);
-        $captureOrderStatusField = new DropdownField('CaptureOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_CAPTURE'), $OrderStatus->map('ID', 'Title'), $this->CaptureOrderStatus);
+        $channelField                               = new ReadonlyField('DisplayPaymentChannel',                    $this->fieldLabel('DisplayPaymentChannel'),                 $this->getPaymentChannelName($this->PaymentChannel));
+        $showFormFieldsOnPaymentSelection           = new CheckboxField('ShowFormFieldsOnPaymentSelection',         $this->fieldLabel('ShowFormFieldsOnPaymentSelection'),      $this->ShowFormFieldsOnPaymentSelection);
+        $captureTransactionOnOrderStatusChangeField = new CheckboxField('CaptureTransactionOnOrderStatusChange',    $this->fieldLabel('CaptureTransactionOnOrderStatusChange'), $this->CaptureTransactionOnOrderStatusChange);
+        $useTransactionIDAsInvoiceText              = new CheckboxField('UseTransactionIDAsInvoiceText',            $this->fieldLabel('UseTransactionIDAsInvoiceText'),         $this->UseTransactionIDAsInvoiceText);
+        $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $OrderStatus->map('ID', 'Title'), $this->CaptureOrderStatus);
         
-        $fields->addFieldToTab('Sections.Basic', $channelField, 'isActive');
-        $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection, 'isActive');
-        $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField, 'isActive');
-        $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField, 'isActive');
+        $fields->addFieldToTab('Sections.Basic', $channelField,                                 'mode');
+        $fields->addFieldToTab('Sections.Basic', $useTransactionIDAsInvoiceText,                'mode');
+        $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection,             'mode');
+        $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
+        $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField,                      'mode');
         $fields->addFieldToTab('Sections.Translations', new ComplexTableField($this, 'SilvercartPaymentIPaymentLanguages', 'SilvercartPaymentIPaymentLanguage'));
         
         // Additional tabs and fields -----------------------------------------
@@ -367,13 +374,13 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         // API Tab Dev fields -------------------------------------------------
         $tabApiTabDev->setChildren(
                 new FieldSet(
-                        new TextField('iPaymentAccountID_Dev', _t('SilvercartPaymentIPayment.ACCOUNT_ID')),
-                        new TextField('iPaymentUserID_Dev', _t('SilvercartPaymentIPayment.USER_ID')),
-                        new TextField('iPaymentPassword_Dev', _t('SilvercartPaymentIPayment.PASSWORD')),
-                        new TextField('iPaymentAdminPassword_Dev', _t('SilvercartPaymentIPayment.PASSWORD_ADMIN')),
-                        new TextField('iPaymentServerIPs_Dev', _t('SilvercartPaymentIPayment.SERVER_IPS')),
-                        new TextField('iPaymentSoapServerUrl_Dev', _t('SilvercartPaymentIPayment.SOAP_URL')),
-                        new TextField('iPaymentApiServerUrl_Dev', _t('SilvercartPaymentIPayment.API_URL'))
+                        new TextField('iPaymentAccountID_Dev',      $this->fieldLabel('iPaymentAccountID_Dev')),
+                        new TextField('iPaymentUserID_Dev',         $this->fieldLabel('iPaymentUserID_Dev')),
+                        new TextField('iPaymentPassword_Dev',       $this->fieldLabel('iPaymentPassword_Dev')),
+                        new TextField('iPaymentAdminPassword_Dev',  $this->fieldLabel('iPaymentAdminPassword_Dev')),
+                        new TextField('iPaymentServerIPs_Dev',      $this->fieldLabel('iPaymentServerIPs_Dev')),
+                        new TextField('iPaymentSoapServerUrl_Dev',  $this->fieldLabel('iPaymentSoapServerUrl_Dev')),
+                        new TextField('iPaymentApiServerUrl_Dev',   $this->fieldLabel('iPaymentApiServerUrl_Dev'))
                 )
         );
 

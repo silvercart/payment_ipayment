@@ -56,6 +56,10 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
             'type'              => 'HiddenField',
             'value'             => '0',
         ),
+        'invoice_text'          => array(
+            'type'              => 'HiddenField',
+            'value'             => '',
+        ),
 
         'addr_street' => array(
             'type'              => 'HiddenField',
@@ -180,6 +184,7 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
             $this->formFields['ipayment_session_id']['value']   = $this->getPaymentMethod()->getSessionId();
         }
         $this->formFields['error_lang']['value']            = substr(Translatable::get_current_locale(), 0, 2);
+        $this->formFields['invoice_text']['value']          = $this->getPaymentMethod()->getTransactionID();
         
         $invoiceAddress = $this->Controller()->getInvoiceAddress();
         
