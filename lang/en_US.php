@@ -26,14 +26,6 @@
 
 global $lang;
 
-
-
-
-
-
-
-
-
 $lang['en_US']['SilvercartHandlingCostIPayment']['PLURALNAME'] = 'Handling Costs';
 $lang['en_US']['SilvercartHandlingCostIPayment']['SINGULARNAME'] = 'Handling Cost';
 

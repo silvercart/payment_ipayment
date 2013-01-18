@@ -27,6 +27,6 @@ DataObject::add_extension('SilvercartPaymentIPayment',         'SilvercartDataOb
 // ----------------------------------------------------------------------------
 // Register CSS requirements
 // ----------------------------------------------------------------------------
-RequirementsEngine::registerThemedCssFile('silvercart_payment_ipayment');
+#RequirementsEngine::registerThemedCssFile('silvercart_payment_ipayment');
 // Require i18n javascript
 Requirements::add_i18n_javascript('silvercart_payment_ipayment/javascript/lang');

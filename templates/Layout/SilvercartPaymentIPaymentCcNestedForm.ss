@@ -3,16 +3,16 @@
     $CustomHtmlFormMetadata
     $CustomHtmlFormErrorMessages
     
-    <% control PaymentMethod %>
+    <% with PaymentMethod %>
     <div class="silvercart-checkout-payment-additionalInfo">
         <strong>$Name</strong>
         <% if showPaymentLogos %>
             <div class="silvercart-checkout-payment-additionalInfo-logos">
             <% if PaymentLogos %>
                 <span class="silvercart-checkout-payment-additionalInfo-logo">
-                    <% control PaymentLogos %>
+                    <% loop PaymentLogos %>
                         $Image
-                    <% end_control %>
+                    <% end_loop %>
                 </span>
             <% end_if %>
             </div>
@@ -50,9 +50,9 @@
 
     <div class="actionRow">
         <div class="type-button">
-            <% control Actions %>
+            <% loop Actions %>
             $Field
-            <% end_control %>
+            <% end_loop %>
         </div>
     </div>
 </form>

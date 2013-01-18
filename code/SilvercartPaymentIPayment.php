@@ -271,13 +271,13 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         parent::createRequiredOrderStatus($requiredStatus);
         parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentIPayment');
 
-        $iPaymentPayments = DataObject::get('SilvercartPaymentIPayment', "`PaidOrderStatus`=0");
+        $iPaymentPayments = DataObject::get('SilvercartPaymentIPayment', "\"PaidOrderStatus\"=0");
         if ($iPaymentPayments) {
             foreach ($iPaymentPayments as $iPaymentPayment) {
-                $iPaymentPayment->PaidOrderStatus       = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
-                $iPaymentPayment->PreauthOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_preauth'")->ID;
-                $iPaymentPayment->CanceledOrderStatus   = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_canceled'")->ID;
-                $iPaymentPayment->ErrorOrderStatus      = DataObject::get_one('SilvercartOrderStatus', "`Code`='ipayment_error'")->ID;
+                $iPaymentPayment->PaidOrderStatus       = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='payed'")->ID;
+                $iPaymentPayment->PreauthOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='ipayment_preauth'")->ID;
+                $iPaymentPayment->CanceledOrderStatus   = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='ipayment_canceled'")->ID;
+                $iPaymentPayment->ErrorOrderStatus      = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='ipayment_error'")->ID;
                 $iPaymentPayment->write();
             }
         }
@@ -330,7 +330,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      *
      * @param mixed $params optional
      *
-     * @return FieldSet
+     * @return FieldList
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
      * @since 09.01.2013
@@ -351,7 +351,9 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection,             'mode');
         $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
         $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField,                      'mode');
-        $fields->addFieldToTab('Sections.Translations', new ComplexTableField($this, 'SilvercartPaymentIPaymentLanguages', 'SilvercartPaymentIPaymentLanguage'));
+        $config = GridFieldConfig_RelationEditor::create();
+        $languagesTable = new GridField('SilvercartPaymentIPaymentLanguages', _t('Silvercart.TRANSLATIONS'), SilvercartPaymentIPaymentLanguage::get(), $config);
+        $fields->addFieldToTab('Sections.Translations', $languagesTable);
         
         // Additional tabs and fields -----------------------------------------
         $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
@@ -373,7 +375,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         // API Tab Dev fields -------------------------------------------------
         $tabApiTabDev->setChildren(
-                new FieldSet(
+                new FieldList(
                         new TextField('iPaymentAccountID_Dev',      $this->fieldLabel('iPaymentAccountID_Dev')),
                         new TextField('iPaymentUserID_Dev',         $this->fieldLabel('iPaymentUserID_Dev')),
                         new TextField('iPaymentPassword_Dev',       $this->fieldLabel('iPaymentPassword_Dev')),
@@ -386,7 +388,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         // API Tab Live fields ------------------------------------------------
         $tabApiTabLive->setChildren(
-                new FieldSet(
+                new FieldList(
                         new TextField('iPaymentAccountID_Live', _t('SilvercartPaymentIPayment.ACCOUNT_ID')),
                         new TextField('iPaymentUserID_Live', _t('SilvercartPaymentIPayment.USER_ID')),
                         new TextField('iPaymentPassword_Live', _t('SilvercartPaymentIPayment.PASSWORD')),
@@ -399,7 +401,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
 
         // Orderstatus Tab fields -------------------------------------------
         $tabOrderStatus->setChildren(
-                new FieldSet(
+                new FieldList(
                         new DropdownField('PaidOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED'), $OrderStatus->map('ID', 'Title'), $this->PaidOrderStatus),
                         new DropdownField('PreauthOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH'), $OrderStatus->map('ID', 'Title'), $this->PreauthOrderStatus),
                         new DropdownField('CanceledOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED'), $OrderStatus->map('ID', 'Title'), $this->CanceledOrderStatus),
@@ -685,7 +687,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @since 15.07.2011
      */
     public function getIPaymentOrder($transactionId) {
-        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s' AND `trx_paymenttyp` = '%s'", $transactionId, $this->PaymentChannel));
+        $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("\"shopper_id\"='%s' AND \"trx_paymenttyp\" = '%s'", $transactionId, $this->PaymentChannel));
         return $iPaymentOrder;
     }
 

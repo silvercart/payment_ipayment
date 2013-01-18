@@ -62,7 +62,7 @@ class SilvercartPaymentIPaymentNotification extends DataObject {
         $iPaymentModule = DataObject::get_one(
             'SilvercartPaymentIPayment',
             sprintf(
-                "`PaymentChannel` = '%s'",
+                "\"PaymentChannel\" = '%s'",
                 $paymentChannel
             )
         );
@@ -97,10 +97,10 @@ class SilvercartPaymentIPaymentNotification extends DataObject {
             $booknr     = $_REQUEST['ret_booknr'];
             $shopper_id = $_REQUEST['shopper_id'];
 
-            $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $shopper_id));
+            $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("\"shopper_id\"='%s'", $shopper_id));
             $iPaymentOrder->update($_REQUEST);
             $iPaymentOrder->write();
-            $order = DataObject::get_one('SilvercartOrder', sprintf("`OrderNumber`='%s'", $shopper_id));
+            $order = DataObject::get_one('SilvercartOrder', sprintf("\"OrderNumber\"='%s'", $shopper_id));
             if ($order) {
                 if (in_array($status, $iPaymentModule->successIPaymentStatus)) {
                     // transaction successful
@@ -117,7 +117,7 @@ class SilvercartPaymentIPaymentNotification extends DataObject {
                 }
             }
 
-            $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("`shopper_id`='%s'", $shopper_id));
+            $iPaymentOrder = DataObject::get_one('SilvercartPaymentIPaymentOrder', sprintf("\"shopper_id\"='%s'", $shopper_id));
             if (!$iPaymentOrder) {
                 $iPaymentOrder = new SilvercartPaymentIPaymentOrder();
             }

@@ -58,7 +58,7 @@ class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCh
             )
         );
         $checkoutData = $this->controller->getCombinedStepData();
-        $order = DataObject::get_one('SilvercartOrder', sprintf("`ID`='%s'", $checkoutData['orderId']));
+        $order = DataObject::get_one('SilvercartOrder', sprintf("\"ID\"='%s'", $checkoutData['orderId']));
         $shopper_id = $order->OrderNumber;
         $iPaymentOrder = $this->getPaymentMethod()->getIPaymentOrder($shopper_id);
         $status = $iPaymentOrder->ret_status;

@@ -154,7 +154,7 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
      */
     public function getPaymentMethod() {
         if (is_null($this->paymentMethod)) {
-            $paymentMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("`PaymentChannel` = '%s'", $this->trx_paymenttyp));
+            $paymentMethod = DataObject::get_one('SilvercartPaymentIPayment', sprintf("\"PaymentChannel\" = '%s'", $this->trx_paymenttyp));
             $this->setPaymentMethod($paymentMethod);
         }
         return $this->paymentMethod;
