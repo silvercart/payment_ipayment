@@ -271,8 +271,8 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         parent::createRequiredOrderStatus($requiredStatus);
         parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentIPayment');
 
-        $iPaymentPayments = DataObject::get('SilvercartPaymentIPayment', "\"PaidOrderStatus\"=0");
-        if ($iPaymentPayments) {
+        $iPaymentPayments = SilvercartPaymentIPayment::get()->filter("PaidOrderStatus", 0);
+        if ($iPaymentPayments->exists()) {
             foreach ($iPaymentPayments as $iPaymentPayment) {
                 $iPaymentPayment->PaidOrderStatus       = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='payed'")->ID;
                 $iPaymentPayment->PreauthOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "\"Code\"='ipayment_preauth'")->ID;
@@ -337,14 +337,14 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      */
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFieldsForModules($params);
-        $OrderStatus = DataObject::get('SilvercartOrderStatus');
+        $OrderStatus = SilvercartOrderStatus::get();
 
         // Add fields to default tab ------------------------------------------
         $channelField                               = new ReadonlyField('DisplayPaymentChannel',                    $this->fieldLabel('DisplayPaymentChannel'),                 $this->getPaymentChannelName($this->PaymentChannel));
         $showFormFieldsOnPaymentSelection           = new CheckboxField('ShowFormFieldsOnPaymentSelection',         $this->fieldLabel('ShowFormFieldsOnPaymentSelection'),      $this->ShowFormFieldsOnPaymentSelection);
         $captureTransactionOnOrderStatusChangeField = new CheckboxField('CaptureTransactionOnOrderStatusChange',    $this->fieldLabel('CaptureTransactionOnOrderStatusChange'), $this->CaptureTransactionOnOrderStatusChange);
         $useTransactionIDAsInvoiceText              = new CheckboxField('UseTransactionIDAsInvoiceText',            $this->fieldLabel('UseTransactionIDAsInvoiceText'),         $this->UseTransactionIDAsInvoiceText);
-        $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $OrderStatus->map('ID', 'Title'), $this->CaptureOrderStatus);
+        $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $OrderStatus->map('ID', 'Title')->toArray(), $this->CaptureOrderStatus);
         
         $fields->addFieldToTab('Sections.Basic', $channelField,                                 'mode');
         $fields->addFieldToTab('Sections.Basic', $useTransactionIDAsInvoiceText,                'mode');
@@ -352,7 +352,12 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
         $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField,                      'mode');
         $config = GridFieldConfig_RelationEditor::create();
-        $languagesTable = new GridField('SilvercartPaymentIPaymentLanguages', _t('Silvercart.TRANSLATIONS'), SilvercartPaymentIPaymentLanguage::get(), $config);
+        $languagesTable = new GridField(
+                'SilvercartPaymentIPaymentLanguages', 
+                _t('Silvercart.TRANSLATIONS'), 
+                SilvercartPaymentIPaymentLanguage::get(), 
+                $config
+                );
         $fields->addFieldToTab('Sections.Translations', $languagesTable);
         
         // Additional tabs and fields -----------------------------------------
