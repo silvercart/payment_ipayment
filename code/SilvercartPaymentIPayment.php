@@ -346,26 +346,26 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $useTransactionIDAsInvoiceText              = new CheckboxField('UseTransactionIDAsInvoiceText',            $this->fieldLabel('UseTransactionIDAsInvoiceText'),         $this->UseTransactionIDAsInvoiceText);
         $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $OrderStatus->map('ID', 'Title')->toArray(), $this->CaptureOrderStatus);
         
-        $fields->addFieldToTab('Sections.Basic', $channelField,                                 'mode');
-        $fields->addFieldToTab('Sections.Basic', $useTransactionIDAsInvoiceText,                'mode');
-        $fields->addFieldToTab('Sections.Basic', $showFormFieldsOnPaymentSelection,             'mode');
-        $fields->addFieldToTab('Sections.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
-        $fields->addFieldToTab('Sections.Basic', $captureOrderStatusField,                      'mode');
-        $config = GridFieldConfig_RelationEditor::create();
+        $fields->addFieldToTab('Root.Basic', $channelField,                                 'mode');
+        $fields->addFieldToTab('Root.Basic', $useTransactionIDAsInvoiceText,                'mode');
+        $fields->addFieldToTab('Root.Basic', $showFormFieldsOnPaymentSelection,             'mode');
+        $fields->addFieldToTab('Root.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
+        $fields->addFieldToTab('Root.Basic', $captureOrderStatusField,                      'mode');
+        $config = SilvercartGridFieldConfig_LanguageRelationEditor::create();
         $languagesTable = new GridField(
                 'SilvercartPaymentIPaymentLanguages', 
                 _t('Silvercart.TRANSLATIONS'), 
                 SilvercartPaymentIPaymentLanguage::get(), 
                 $config
                 );
-        $fields->addFieldToTab('Sections.Translations', $languagesTable);
+        $fields->addFieldToTab('Root.Translations', $languagesTable);
         
         // Additional tabs and fields -----------------------------------------
         $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
         $tabOrderStatus = new Tab('OrderStatus', _t('SilvercartPaymentIPayment.ATTRIBUTED_ORDERSTATUS', 'attributed order status'));
 
-        $fields->fieldByName('Sections')->push($tabApi);
-        $fields->fieldByName('Sections')->push($tabOrderStatus);
+        $fields->fieldByName('Root')->push($tabApi);
+        $fields->fieldByName('Root')->push($tabOrderStatus);
 
         // API Tabset ---------------------------------------------------------
         $tabApiTabset = new TabSet('APIOptions');
