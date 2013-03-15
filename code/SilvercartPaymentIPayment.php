@@ -351,7 +351,7 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         $fields->addFieldToTab('Root.Basic', $showFormFieldsOnPaymentSelection,             'mode');
         $fields->addFieldToTab('Root.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
         $fields->addFieldToTab('Root.Basic', $captureOrderStatusField,                      'mode');
-        $config = SilvercartGridFieldConfig_LanguageRelationEditor::create();
+        $config = SilvercartGridFieldConfig_ExclusiveRelationEditor::create();
         $languagesTable = new GridField(
                 'SilvercartPaymentIPaymentLanguages', 
                 _t('Silvercart.TRANSLATIONS'), 
