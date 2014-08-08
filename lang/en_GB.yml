@@ -37,6 +37,7 @@ en_GB:
     ERROR_SESSION: "An error occured by trying to connect to iPayment. Please try again. If this error repeats, please contact us."
     INFOTEXT_CHECKOUT: "Payment via iPayment"
     IPAYMENT_API: "iPayment API"
+    iPaymentAPIData: "iPayment login data"
     NAME: "iPayment"
     ORDERSTATUS_CANCELED: "Order status \"canceled\""
     ORDERSTATUS_CAPTURE: "Order status to capture payment"

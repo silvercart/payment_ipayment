@@ -40,6 +40,7 @@ de:
     ERROR_SESSION: "Bei der Verbindung mit iPayment ist ein Fehler aufgetreten. Bitte entschuldigen Sie die Verzögerung und versuchen Sie es noch einmal. Sollte der Fehler wiederholt auftreten, setzen Sie sich bitte mit uns in Verbindung."
     INFOTEXT_CHECKOUT: "Zahlung über iPayment"
     IPAYMENT_API: "iPayment API"
+    iPaymentAPIData: "iPayment Zugangsdaten"
     NAME: "iPayment"
     ORDERSTATUS_CANCELED: "Bestellstatus für Meldung \"abgebrochen\""
     ORDERSTATUS_CAPTURE: "Bestellstatus für Zahlungsbuchung"

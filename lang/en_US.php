@@ -87,6 +87,7 @@ $lang['en_US']['SilvercartPaymentIPayment']['SOAP_URL'] = 'URL of the iPayment S
 $lang['en_US']['SilvercartPaymentIPayment']['TITLE'] = 'iPayment';
 $lang['en_US']['SilvercartPaymentIPayment']['USER_ID'] = 'User ID';
 $lang['en_US']['SilvercartPaymentIPayment']['USETRANSACTIONIDASINVOICETEXT'] = 'Use TransactionID (Order number) as invoice text';
+$lang['en_US']['SilvercartPaymentIPayment']['iPaymentAPIData'] = 'iPayment login data';
 
 $lang['en_US']['SilvercartPaymentIPaymentLanguage']['SINGULARNAME'] = 'Translation of the payment method iPayment';
 $lang['en_US']['SilvercartPaymentIPaymentLanguage']['PLURALNAME'] = 'Translations of the payment method iPayment';

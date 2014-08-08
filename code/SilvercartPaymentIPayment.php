@@ -321,8 +321,75 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
                     'DisplayPaymentChannel'                 => _t('SilvercartPaymentIPayment.PAYMENT_CHANNEL', 'Payment Channel'),
                     'CaptureTransactionOnOrderStatusChange' => _t('SilvercartPaymentIPayment.CAPTURE_TRANSACTION_ON_ORDER_STATUS_CHANGE'),
                     'CaptureOrderStatus'                    => _t('SilvercartPaymentIPayment.ORDERSTATUS_CAPTURE'),
+                    'TabOrderStatus'                        => _t('SilvercartPaymentIPayment.ATTRIBUTED_ORDERSTATUS', 'attributed order status'),
+                    'iPaymentAPIData'                       => _t('SilvercartPaymentIPayment.iPaymentAPIData'),
+                    'SilvercartPaymentIPaymentLanguages'    => _t('Silvercart.TRANSLATIONS'),
                 )
         );
+    }
+    
+    /**
+     * Adds the fields for the PayPal API
+     *
+     * @param FieldList $fields FieldList to add fields to
+     * @param bool      $forDev Add fields for dev or live mode?
+     * 
+     * @return void
+     */
+    protected function getFieldsForAPI($fields, $forDev = false) {
+        $mode = 'Live';
+        if ($forDev) {
+            $mode = 'Dev';
+        }
+        
+        $apiGroup = new SilvercartFieldGroup('APIDevGroup', '', $fields);
+        $apiGroup->push(new TextField('iPaymentAccountID_' . $mode,     $this->fieldLabel('iPaymentAccountID_' . $mode)));
+        $apiGroup->push(new TextField('iPaymentUserID_' . $mode,        $this->fieldLabel('iPaymentUserID_' . $mode)));
+        $apiGroup->push(new TextField('iPaymentPassword_' . $mode,      $this->fieldLabel('iPaymentPassword_' . $mode)));
+        $apiGroup->push(new TextField('iPaymentAdminPassword_' . $mode, $this->fieldLabel('iPaymentAdminPassword_' . $mode)));
+        
+        $fieldlist = array(
+                    $apiGroup,
+                    new TextField('iPaymentServerIPs_' . $mode,     $this->fieldLabel('iPaymentServerIPs_' . $mode)),
+                    new TextField('iPaymentSoapServerUrl_' . $mode, $this->fieldLabel('iPaymentSoapServerUrl_' . $mode)),
+                    new TextField('iPaymentApiServerUrl_' . $mode,  $this->fieldLabel('iPaymentApiServerUrl_' . $mode)),
+        );
+        
+        $apiDataToggle = ToggleCompositeField::create(
+                'iPaymentAPI' . $mode,
+                $this->fieldLabel('iPaymentAPIData') . ' "' . $this->fieldLabel('mode' . $mode) . '"',
+                $fieldlist
+        )->setHeadingLevel(4)->setStartClosed(true);
+        
+        $fields->addFieldToTab('Root.Basic', $apiDataToggle);
+    }
+    
+    /**
+     * Adds the fields for the PayPal order status
+     *
+     * @param FieldList $fields FieldList to add fields to
+     * 
+     * @return void
+     */
+    protected function getFieldsForOrderStatus($fields) {
+        $orderStatus = SilvercartOrderStatus::get();
+        $fieldlist = array(
+                $fields->dataFieldByName('orderStatus'),
+                new DropdownField('PaidOrderStatus',     $this->fieldLabel('PaidOrderStatus'),     $orderStatus->map('ID', 'Title'), $this->PaidOrderStatus),
+                new DropdownField('PreauthOrderStatus',  $this->fieldLabel('PreauthOrderStatus'),  $orderStatus->map('ID', 'Title'), $this->PreauthOrderStatus),
+                new DropdownField('CanceledOrderStatus', $this->fieldLabel('CanceledOrderStatus'), $orderStatus->map('ID', 'Title'), $this->CanceledOrderStatus),
+                new DropdownField('ErrorOrderStatus',    $this->fieldLabel('ErrorOrderStatus'),    $orderStatus->map('ID', 'Title'), $this->ErrorOrderStatus),
+        );
+        
+        $orderStatusDataToggle = ToggleCompositeField::create(
+                'OrderStatus',
+                $this->fieldLabel('TabOrderStatus'),
+                $fieldlist
+        )->setHeadingLevel(4)->setStartClosed(true);
+        
+        $fields->removeByName('orderStatus');
+        
+        $fields->addFieldToTab('Root.Basic', $orderStatusDataToggle);
     }
 
     /**
@@ -331,89 +398,35 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
      * @param mixed $params optional
      *
      * @return FieldList
-     *
-     * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 09.01.2013
      */
     public function getCMSFields($params = null) {
         $fields = parent::getCMSFieldsForModules($params);
-        $OrderStatus = SilvercartOrderStatus::get();
-
-        // Add fields to default tab ------------------------------------------
+        $orderStatus = SilvercartOrderStatus::get();
+        
         $channelField                               = new ReadonlyField('DisplayPaymentChannel',                    $this->fieldLabel('DisplayPaymentChannel'),                 $this->getPaymentChannelName($this->PaymentChannel));
         $showFormFieldsOnPaymentSelection           = new CheckboxField('ShowFormFieldsOnPaymentSelection',         $this->fieldLabel('ShowFormFieldsOnPaymentSelection'),      $this->ShowFormFieldsOnPaymentSelection);
         $captureTransactionOnOrderStatusChangeField = new CheckboxField('CaptureTransactionOnOrderStatusChange',    $this->fieldLabel('CaptureTransactionOnOrderStatusChange'), $this->CaptureTransactionOnOrderStatusChange);
         $useTransactionIDAsInvoiceText              = new CheckboxField('UseTransactionIDAsInvoiceText',            $this->fieldLabel('UseTransactionIDAsInvoiceText'),         $this->UseTransactionIDAsInvoiceText);
-        $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $OrderStatus->map('ID', 'Title')->toArray(), $this->CaptureOrderStatus);
+        $captureOrderStatusField                    = new DropdownField('CaptureOrderStatus',                       $this->fieldLabel('CaptureOrderStatus'),                    $orderStatus->map('ID', 'Title')->toArray(), $this->CaptureOrderStatus);
         
         $fields->addFieldToTab('Root.Basic', $channelField,                                 'mode');
         $fields->addFieldToTab('Root.Basic', $useTransactionIDAsInvoiceText,                'mode');
         $fields->addFieldToTab('Root.Basic', $showFormFieldsOnPaymentSelection,             'mode');
         $fields->addFieldToTab('Root.Basic', $captureTransactionOnOrderStatusChangeField,   'mode');
         $fields->addFieldToTab('Root.Basic', $captureOrderStatusField,                      'mode');
-        $config = SilvercartGridFieldConfig_ExclusiveRelationEditor::create();
-        $languagesTable = new GridField(
-                'SilvercartPaymentIPaymentLanguages', 
-                _t('Silvercart.TRANSLATIONS'), 
-                SilvercartPaymentIPaymentLanguage::get(), 
-                $config
-                );
-        $fields->addFieldToTab('Root.Translations', $languagesTable);
+
+        $this->getFieldsForOrderStatus($fields);
+        $this->getFieldsForAPI($fields, true);
+        $this->getFieldsForAPI($fields);
         
-        // Additional tabs and fields -----------------------------------------
-        $tabApi = new Tab('iPaymentAPI', _t('SilvercartPaymentIPayment.IPAYMENT_API', 'iPayment API'));
-        $tabOrderStatus = new Tab('OrderStatus', _t('SilvercartPaymentIPayment.ATTRIBUTED_ORDERSTATUS', 'attributed order status'));
-
-        $fields->fieldByName('Root')->push($tabApi);
-        $fields->fieldByName('Root')->push($tabOrderStatus);
-
-        // API Tabset ---------------------------------------------------------
-        $tabApiTabset = new TabSet('APIOptions');
-        $tabApiTabDev = new Tab(_t('SilvercartPaymentIPayment.API_DEVELOPMENT_MODE', 'API development mode'));
-        $tabApiTabLive = new Tab(_t('SilvercartPaymentIPayment.API_LIVE_MODE', 'API live mode'));
-
-        // API Tabs -----------------------------------------------------------
-        $tabApiTabset->push($tabApiTabDev);
-        $tabApiTabset->push($tabApiTabLive);
-
-        $tabApi->push($tabApiTabset);
-
-        // API Tab Dev fields -------------------------------------------------
-        $tabApiTabDev->setChildren(
-                new FieldList(
-                        new TextField('iPaymentAccountID_Dev',      $this->fieldLabel('iPaymentAccountID_Dev')),
-                        new TextField('iPaymentUserID_Dev',         $this->fieldLabel('iPaymentUserID_Dev')),
-                        new TextField('iPaymentPassword_Dev',       $this->fieldLabel('iPaymentPassword_Dev')),
-                        new TextField('iPaymentAdminPassword_Dev',  $this->fieldLabel('iPaymentAdminPassword_Dev')),
-                        new TextField('iPaymentServerIPs_Dev',      $this->fieldLabel('iPaymentServerIPs_Dev')),
-                        new TextField('iPaymentSoapServerUrl_Dev',  $this->fieldLabel('iPaymentSoapServerUrl_Dev')),
-                        new TextField('iPaymentApiServerUrl_Dev',   $this->fieldLabel('iPaymentApiServerUrl_Dev'))
-                )
+        $translations = new GridField(
+                'SilvercartPaymentIPaymentLanguages',
+                $this->fieldLabel('SilvercartPaymentIPaymentLanguages'),
+                $this->SilvercartPaymentIPaymentLanguages(),
+                SilvercartGridFieldConfig_ExclusiveRelationEditor::create()
         );
-
-        // API Tab Live fields ------------------------------------------------
-        $tabApiTabLive->setChildren(
-                new FieldList(
-                        new TextField('iPaymentAccountID_Live', _t('SilvercartPaymentIPayment.ACCOUNT_ID')),
-                        new TextField('iPaymentUserID_Live', _t('SilvercartPaymentIPayment.USER_ID')),
-                        new TextField('iPaymentPassword_Live', _t('SilvercartPaymentIPayment.PASSWORD')),
-                        new TextField('iPaymentAdminPassword_Live', _t('SilvercartPaymentIPayment.PASSWORD_ADMIN')),
-                        new TextField('iPaymentServerIPs_Live', _t('SilvercartPaymentIPayment.SERVER_IPS')),
-                        new TextField('iPaymentSoapServerUrl_Live', _t('SilvercartPaymentIPayment.SOAP_URL')),
-                        new TextField('iPaymentApiServerUrl_Live', _t('SilvercartPaymentIPayment.API_URL'))
-                )
-        );
-
-        // Orderstatus Tab fields -------------------------------------------
-        $tabOrderStatus->setChildren(
-                new FieldList(
-                        new DropdownField('PaidOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PAYED'), $OrderStatus->map('ID', 'Title'), $this->PaidOrderStatus),
-                        new DropdownField('PreauthOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_PREAUTH'), $OrderStatus->map('ID', 'Title'), $this->PreauthOrderStatus),
-                        new DropdownField('CanceledOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_CANCELED'), $OrderStatus->map('ID', 'Title'), $this->CanceledOrderStatus),
-                        new DropdownField('ErrorOrderStatus', _t('SilvercartPaymentIPayment.ORDERSTATUS_ERROR'), $OrderStatus->map('ID', 'Title'), $this->ErrorOrderStatus)
-                )
-        );
-
+        $fields->addFieldToTab('Root.Translations', $translations);
+        
         return $fields;
     }
 
