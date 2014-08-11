@@ -57,10 +57,11 @@ class SilvercartPaymentIPaymentNestedForm extends SilvercartCheckoutFormStep4Def
      * @return void
      *
      * @author Sebastian Diel <sdiel@pixeltricks.de>
-     * @since 04.04.2011
+     * @since 11.08.2014
      */
     public function preferences() {
         parent::preferences();
+        $this->preferences['submitButtonExtraClasses'] = array('btn', 'btn-success', 'pull-right');
         $this->getPaymentMethod()->setCancelLink(Director::absoluteURL($this->controller->Link()));
     }
 

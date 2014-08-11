@@ -10,5 +10,5 @@
     <% end_if %>
     <label for="{$FormName}_{$FieldName}">{$Label}</label>
     <p><% _t('SilvercartPaymentIPaymentCcCheckoutFormStep1.CC_EXPDATE_HINT') %></p>
-    $FieldTag<span>/</span>$Parent.dataFieldByName(cc_expdate_year)
+    {$FieldTag}<span>/</span>$Parent.CustomHtmlFormFieldByName(cc_expdate_year, CustomHtmlFormFieldHidden)
 </div>

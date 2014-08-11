@@ -1,5 +1,5 @@
 <% require javascript(silvercart_payment_ipayment/javascript/SilvercartPaymentIPaymentCc.js) %>
-<form class="yform silvercart-payment-ipayment-cc-form" $FormAttributes >
+<form class="yform form-horizontal silvercart-payment-ipayment-cc-form" $FormAttributes >
     $CustomHtmlFormMetadata
     $CustomHtmlFormErrorMessages
     

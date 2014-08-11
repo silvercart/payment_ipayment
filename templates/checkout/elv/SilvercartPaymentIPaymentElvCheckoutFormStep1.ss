@@ -1,4 +1,4 @@
-<form class="yform" $FormAttributes >
+<form class="yform form-horizontal" $FormAttributes >
     $CustomHtmlFormErrorMessages
 
     $CustomHtmlFormFieldByName(silent,CustomHtmlFormFieldHidden)
