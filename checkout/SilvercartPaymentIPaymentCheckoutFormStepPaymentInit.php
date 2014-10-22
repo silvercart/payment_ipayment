@@ -65,10 +65,10 @@ class SilvercartPaymentIPaymentCheckoutFormStepPaymentInit extends SilvercartChe
                         $this->addMessage($this->paymentMethodObj->getErrorMessage($_GET['ret_errorcode']));
                     }
                     $this->paymentMethodObj->Log('error', 'error  ' . $_GET['ret_errorcode'] . ': ' . $_GET['ret_errormsg'] . '; transaction: ' . $_GET['shopper_id']);
-                    $ipayment_session_id = $this->dataFieldByName('ipayment_session_id');
+                    $ipayment_session_id = $this->fields->dataFieldByName('ipayment_session_id');
                     $ipayment_session_id->setValue($this->paymentMethodObj->refreshSessionId());
                     if (array_key_exists('addr_name', $_GET)) {
-                        $addr_name = $this->dataFieldByName('addr_name');
+                        $addr_name = $this->fields->dataFieldByName('addr_name');
                         if ($addr_name) {
                             $addr_name->setValue($_GET['addr_name']);
                         }
