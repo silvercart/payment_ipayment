@@ -33,6 +33,11 @@
  */
 class SilvercartPaymentIPaymentCcNestedForm extends SilvercartPaymentIPaymentNestedForm {
 
+    /**
+     * Form field definitions.
+     *
+     * @var array
+     */
     protected $formFields = array(
         'silent' => array(
             'type'              => 'HiddenField',
@@ -126,6 +131,11 @@ class SilvercartPaymentIPaymentCcNestedForm extends SilvercartPaymentIPaymentNes
         ),
     );
 
+    /**
+     * Error codes and their corresponding FormFields
+     * 
+     * @var array
+     */
     protected $errorCodeFormFieldMatching = array(
         5000 => 'addr_name',
         5001 => 'cc_number',

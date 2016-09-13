@@ -59,6 +59,11 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         'ret_status'                => 'Varchar(255)',
     );
 
+    /**
+     * define 1:1 relations
+     *
+     * @var array
+     */
     public static $has_one = array(
         'Member' => 'Member',
     );
@@ -72,16 +77,29 @@ class SilvercartPaymentIPaymentOrder extends DataObject {
         "Versioned('Live')",
     );
     
+    /**
+     * Allowed capture types for credit card processing
+     * 
+     * @var array
+     */
     public static $allowedCaptureTypes = array(
         'preauth',
         're_preauth',
     );
-    
+    /**
+     * Allowed reverse types for credit card processing
+     * 
+     * @var array
+     */
     public static $allowedReverseTypes = array(
         'preauth',
         're_preauth',
     );
-    
+    /**
+     * Allowed pre authorize types for credit card processing
+     * 
+     * @var array
+     */
     public static $allowedPreAuthorizeTypes = array(
         'preauth',
         're_preauth',

@@ -34,7 +34,8 @@
 class SilvercartPaymentIPaymentCheckoutFormStepProcessOrder extends SilvercartCheckoutFormStepProcessOrder {
     
     /**
-     *
+     * Payment method object
+     * 
      * @var SilvercartPaymentMethod
      */
     protected $paymentMethod = null;

@@ -33,6 +33,11 @@
  */
 class SilvercartPaymentIPaymentPpCheckoutFormStep1 extends SilvercartPaymentIPaymentCheckoutFormStepPaymentInit {
 
+    /**
+     * Form field definitions.
+     *
+     * @var array
+     */
     protected $formFields = array(
         'silent' => array(
             'type'              => 'HiddenField',
@@ -75,7 +80,12 @@ class SilvercartPaymentIPaymentPpCheckoutFormStep1 extends SilvercartPaymentIPay
             'value'             => '',
         ),
     );
-
+    
+    /**
+     * Error codes and their corresponding FormFields
+     * 
+     * @var array
+     */
     protected $errorCodeFormFieldMatching = array(
         5000 => 'addr_name',
         5001 => 'cc_number',

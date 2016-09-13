@@ -32,7 +32,12 @@
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  */
 class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPaymentCheckoutFormStepPaymentInit {
-
+    
+    /**
+     * Form field definitions.
+     *
+     * @var array
+     */
     protected $formFields = array(
         'silent' => array(
             'type'              => 'HiddenField',
@@ -119,6 +124,11 @@ class SilvercartPaymentIPaymentElvCheckoutFormStep1 extends SilvercartPaymentIPa
         ),
     );
 
+    /**
+     * Error codes and their corresponding FormFields
+     * 
+     * @var array
+     */
     protected $errorCodeFormFieldMatching = array(
         5010 => 'bank_accountnumber',
         5011 => 'bank_code',

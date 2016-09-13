@@ -103,6 +103,11 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'CaptureOrderStatus' => 'Int',
     );
 
+    /**
+     * Define castings for properties
+     * 
+     * @var array
+     */
     public static $casting = array(
         'iPaymentAccountID' => 'VarChar(255)',
         'iPaymentUserID' => 'VarChar(255)',
@@ -205,6 +210,12 @@ class SilvercartPaymentIPayment extends SilvercartPaymentMethod {
         'auth',
         'capture',
     );
+    
+    /**
+     * Error codes and their corresponding identifiers
+     * 
+     * @var array
+     */
     public static $errorCodes = array(
         // cc
         5000    => 'MISSING_CARDHOLDER',
